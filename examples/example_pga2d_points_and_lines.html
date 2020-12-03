@@ -1,7 +1,9 @@
 <HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
-<BODY><SCRIPT>
+<BODY>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Create a Clifford Algebra with 2,0,1 metric. 
 Algebra(2,0,1,()=>{
     
@@ -39,4 +41,5 @@ Algebra(2,0,1,()=>{
     ],{grid:true}));
 
 });
-</SCRIPT></BODY>
+</SCRIPT>
+</BODY>

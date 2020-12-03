@@ -7,12 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no">
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-96802693-2"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-  </script>
+  <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-96802693-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+  -->
   
   <!-- Fonts and Icons -->
   <link rel="shortcut icon" type="image/x-icon" href="https://enkimute.github.io/ganja.js/images/favicon.ico">
@@ -95,7 +97,12 @@
     }
   </style>
   <!-- ganja -->
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
+  <!--
+    <SCRIPT SRC="../ganja.js"></SCRIPT>
+  -->
+  <SCRIPT type="module">
+    import Algebra123 from "../src/index.js";
+  </SCRIPT>
   <!-- ace editor -->
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
   <!-- katex math typesetting -->
@@ -518,7 +525,10 @@
     // Grab the source and update the editor.  
       var scr = [...els.sample.contentDocument.querySelectorAll("script")].pop();
       if (window.editor && scr) {
-        editor.setValue(scr.innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
+        var scripttext = scr.innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n');
+        scripttext = scripttext.replaceAll(/import(.*)/g, "");
+        scripttext = scripttext.trim();
+        editor.setValue(scripttext);
         editor.clearSelection();
       // Link shift+enter  
         editor.commands.addCommand({ name: "run changes", bindKey: {win: "Shift-Enter", mac: "Shift-Enter"}, exec: function(editor) { els.run.click(); } });
