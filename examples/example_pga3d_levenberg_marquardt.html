@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Given a series of temperature measurements made in a bowl of water that is being
 // heated, fit Newton's law of cooling and determine the temperature of the heater,
 // the starting temperature of the water and "r", proportional to the heat transfer
@@ -63,4 +62,4 @@ Algebra(2,0,1).inline((t,s,s2,s3,s4)=>{
   "r &cong; heat transfer coefficient = "+est[2].toFixed(7),
   "black = samples",0xAAAAAA,"grey = initial guess",0xFF0000,"red = final fit",0x008800,"green = ground truth",0x555555,
 ],samples,est_points,act_points,start_points);
-</SCRIPT></BODY>
+</SCRIPT>

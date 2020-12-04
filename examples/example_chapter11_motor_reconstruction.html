@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 Algebra({p:3,r:1,baseType:Float64Array},()=>{
     
   // define points dually : independent of choice of basis order.    
@@ -80,4 +79,4 @@ Algebra({p:3,r:1,baseType:Float64Array},()=>{
   // Append graph to document. (html stuff)
   document.body.appendChild(canvas);
 })
-</SCRIPT></BODY>
+</SCRIPT>

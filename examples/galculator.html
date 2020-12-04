@@ -1,6 +1,5 @@
 <HEAD>
   <TITLE>GAlculator</TITLE>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
   <link href="https://fonts.googleapis.com/css?family=Exo:500" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=0.6, maximum-scale=0.6, user-scalable=0"/>
   <meta name="mobile-web-app-capable" content="yes">
@@ -317,7 +316,9 @@
     <DIV CLASS="numInput" ID="screen">0</DIV>
   </DIV>
 
-  <SCRIPT>
+  <script type="module">
+    import Algebra from "../src/index.js";
+
    // Minimal calculator implementation. Globals for our current algebra, mode, history, variables etc ..  
      var Al = Algebra(), mode=0, histor='', cur='', store=false, help=false, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
      

@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Dual Numbers Example : Automatic Differentiation.
 Algebra(0,0,1,()=>{
 
@@ -44,4 +43,4 @@ Algebra({basis,Cayley},()=>{
   var f = (x)=>0.25*x*x*x*x-0.5;
   for (var i=0; i<5; i++) document.body.appendChild(this.graph((x)=>f(x+1e1)[i]));
 });
-</SCRIPT></BODY>
+</SCRIPT>

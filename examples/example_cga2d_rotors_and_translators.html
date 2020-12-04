@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Create a Clifford Algebra with 3,1 metric for 2D CGA. 
 Algebra(3,1,()=>{ 
 
@@ -29,4 +28,4 @@ Algebra(3,1,()=>{
   ],{conformal:true,animate:true,grid:true}));
   
 });
-</SCRIPT></BODY>
+</SCRIPT>

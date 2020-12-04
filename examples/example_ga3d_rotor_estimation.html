@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 //** Quite an exotic example. We create a Clifford Algebra over dual vectors (with 3 dual components) **//
 //** and use it to do automatic differentiation and rotor estimation between point clouds.            **//
 //** for info see https://beta.observablehq.com/@enkimute/rotor-estimation-and-ad-in-ga               **//
@@ -41,4 +40,4 @@ document.body.appendChild(Algebra(3,0,1).inline(solve=>{
     return [ 0x000000,...pA, 0xFF0000, ...pB, 0xAA0000FF, guess, ...trails ];
   },{gl:1,camera,animate:1});
 })(solve));
-</SCRIPT></BODY>
+</SCRIPT>

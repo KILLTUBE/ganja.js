@@ -1,4 +1,4 @@
-//https://enkimute.github.io/ganja.js/examples/coffeeshop.html#VuJHbekzh
+// https://enkimute.github.io/ganja.js/examples/coffeeshop.html#VuJHbekzh
 // Create a Clifford Algebra with 2,0,1 metric. 
 Algebra(2,0,1,()=>{
 

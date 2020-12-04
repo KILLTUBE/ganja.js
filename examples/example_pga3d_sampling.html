@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 Algebra(3,0,1,()=>{
 
     // Sampling random points (or directions) on a subspace or shape is an important component in any
@@ -61,4 +60,4 @@ var _ri=new Uint32Array(1), radical_inverse = (bits)=>{
         _ri[0] = ((_ri[0] & 0x00FF00FF) << 8) | ((_ri[0] & 0xFF00FF00) >>> 8);
         return _ri[0] * 2.3283064365386963e-10;
     }
-</SCRIPT></BODY>
+</SCRIPT>

@@ -54,4 +54,8 @@ import Algebra from "./Algebra.js";
     *   },[func])                            => optional function for the translator.
    **/
 
+if (window) {
+    window.Algebra = Algebra;
+}
+
 export default Algebra;

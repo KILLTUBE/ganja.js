@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Create the PGA algebra with 3,0,1 signature.
 Algebra(3,0,1,()=>{
 
@@ -47,4 +46,4 @@ Algebra(3,0,1,()=>{
   // Add the graph to the webpage.
   document.body.appendChild(canvas);
 })
-</SCRIPT></BODY>
+</SCRIPT>

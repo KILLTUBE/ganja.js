@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Create a Clifford Algebra with 4,4 metric for "The Mother Algebra" 
 Algebra(4,4,()=>{ 
   
@@ -38,4 +37,4 @@ Algebra(4,4,()=>{
   ],{animate:true,spin:1,thresh:0.15,up:pnt_opns}))
 
 });
-</SCRIPT></BODY>
+</SCRIPT>

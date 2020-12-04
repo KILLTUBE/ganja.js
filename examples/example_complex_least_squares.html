@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Given a set of input points A
 var A = [[0,1],[2,0],[1,0],[0,-1]];
 
@@ -44,4 +43,4 @@ Algebra(2,0,1,()=>{
     [0x0000FF], Y2.map(x=>x[0]*.5e02-x[1]*.5e01+1e12),
   )));
 });
-</SCRIPT></BODY>
+</SCRIPT>

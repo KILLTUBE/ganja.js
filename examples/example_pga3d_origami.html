@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // Create a Clifford Algebra with 2,0,1 metric.
 Algebra(3,0,1,()=>{
   // First three Huzita-Hatori axioms, rotor and drawing helper.
@@ -59,4 +58,4 @@ Algebra(3,0,1,()=>{
      return ["Folding Kabuto "+Math.min(11,(move+1))+"/11",0xFFFFFF].concat(stroke(cur+1e012+.5e013));
   },{animate:true,camera}));
 });
-</SCRIPT></BODY>
+</SCRIPT>

@@ -1,4 +1,4 @@
-https://enkimute.github.io/ganja.js/examples/coffeeshop.html#NpsKhuwlO
+// https://enkimute.github.io/ganja.js/examples/coffeeshop.html#NpsKhuwlO
 // Ganja.js does not handle R2 or R3 natively, but this is easy to work around.
 // Lets do it for R2.
 

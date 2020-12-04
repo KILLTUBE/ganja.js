@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <HEAD>
-  <!-- ganja -->
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
   <!-- ace editor -->
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
   <!-- katex math typesetting -->
@@ -35,7 +33,8 @@ GAViewer syntax test.
 </PRE>
     <PRE CLASS="input"></PRE>    
   </DIV>
-  <SCRIPT>
+  <script type="module">
+    import Algebra from "../src/index.js";
   // Testing - simple 2D PGA to start.
     var A = Algebra(4,1);
     var Graph = document.querySelector(".graph").appendChild(A.graph([],{gl:true,grid:true,conformal:true,z:8}));
@@ -130,8 +129,7 @@ GAViewer syntax test.
       editor.setValue(cmds[Math.min(cmds.length,++histp)]||"");
     })
     editor.focus();
-  </SCRIPT>
-  <SCRIPT>
+
   // PREAMBLE - GAVIEWER commands.
     var clc     = ()=>{ cmds = []; out.innerHTML=''; histp = -1; },
         clf     = ()=>{ Graph.update([]); results = []; },

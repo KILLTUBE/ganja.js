@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // the OPNS visualizer can be used to visualize degenerate elements
 // for which the parametric form is unknown. It works by raytracing
 // a boundary on the length of the outer product.
@@ -35,4 +34,4 @@ Algebra({p:4,q:1,graded:true},()=>{
     },{up:upviz, h:Math.PI/2, animate:1}))
     
 })
-</SCRIPT></BODY>
+</SCRIPT>

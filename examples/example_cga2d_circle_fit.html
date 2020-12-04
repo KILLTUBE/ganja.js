@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // https://www.researchgate.net/publication/266149530
 // Circle LLS fitting. MATRIX FREE version by enki.
 
@@ -44,4 +43,4 @@ Algebra(3,1,()=>{
                 0xff0000,...pts,0x0000ff,eigen[0], 0xffaaff,eigen[1], 0xff00ff,eigen[0]&eigen[1],
     ]},{conformal:true,animate:1,pointRadius:1,grid:1}));
 })
-</SCRIPT></BODY>
+</SCRIPT>

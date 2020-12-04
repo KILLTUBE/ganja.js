@@ -1,7 +1,6 @@
-<HEAD>
-  <SCRIPT SRC="../ganja.js"></SCRIPT>
-</HEAD>
-<BODY><SCRIPT>
+<script type="module">
+import Algebra from "../src/index.js";
+
 // A 3 layer convolutional network with AD and Back-Propagation is trained to learn
 // an 'AND' relationship using 500 epochs of 4 noisy samples.
 // The resulting decision boundary is displayed.
@@ -31,4 +30,4 @@ Algebra({dual:12},()=>{
   var canvas = document.body.appendChild(this.graph((x,y)=>forward([x/2+0.5,y/2+0.5])[0].s,{width:64,height:64}));
   Object.assign(canvas.style,{width:256,height:256})
 });
-</SCRIPT></BODY>
+</SCRIPT>
