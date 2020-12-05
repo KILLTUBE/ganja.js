@@ -53,15 +53,32 @@ export default function Algebra(p,q,r) {
       var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q+r),t=0,ab=A&B,res=A^B; if (ab&((1<<r)-1)) return [0,0]; while (n--) t^=(A=A>>1); t&=B; t^=ab>>(p+r); t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
           bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); var c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c };
   
+    var basisg;
     if (!options.graded && tot <= 6 || options.graded===false || options.Cayley) {
-        var {generator, drm} = MultiVectorExtendsFloat32Array(basis, options, simplify, grades, grade_start, tot, p, q, r);
+        var {generator, drm, mulTable, metric, gp} = MultiVectorExtendsFloat32Array(basis, options, simplify, grades, grade_start, tot, p, q, r);
         /// Graded generator for high-dimensional algebras.
     } else {
-        var {generator, counts} = MultiVectorExtendsArray(basis, simplify_bits, grades, grade_start, tot, low, bc);
+        var {generator, counts, basisg} = MultiVectorExtendsArray(basis, simplify_bits, grades, grade_start, tot, low, bc);
      // This generator is UNDER DEVELOPMENT - I'm publishing it so I can test on observable.
     }
   
-    var res = ElementExtendsGenerator(generator, options, tot, drm, counts, simplify, basis, p, q, r);
+    var res = ElementExtendsGenerator(
+        generator,
+        options,
+        tot,
+        drm,
+        counts,
+        simplify,
+        basis,
+        p,
+        q,
+        r,
+        metric,
+        mulTable,
+        grades,
+        gp,
+        basisg
+    );
   
       if (options.dual) {
         Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});

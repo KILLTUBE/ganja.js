@@ -1,4 +1,20 @@
-export default function ElementExtendsGenerator(generator, options, tot, drm, counts, simplify, basis, p, q, r) {
+export default function ElementExtendsGenerator(
+    generator,
+    options,
+    tot,
+    drm,
+    counts,
+    simplify,
+    basis,
+    p,
+    q,
+    r,
+    metric,
+    mulTable,
+    grades,
+    gp,
+    basisg
+) {
     // Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
     var res = class Element extends generator {
 

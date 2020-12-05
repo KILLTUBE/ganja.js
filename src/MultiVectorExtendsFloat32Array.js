@@ -91,6 +91,9 @@ export default function MultiVectorExtendsFloat32Array(basis, options, simplify,
 
     return {
         generator,
-        drm
+        drm,
+        mulTable,
+        metric,
+        gp
     };
 }

@@ -153,6 +153,7 @@ export default function MultiVectorExtendsArray(basis, simplify_bits, grades, gr
     
     return {
         generator,
-        counts
+        counts,
+        basisg
     };
 }
