@@ -8,8 +8,8 @@ interface Options {
     even?: boolean;
     dual?: number;
     camera?: Element;
-    width?: number;
-    height?: number;
+    width?: number | string;
+    height?: number | string;
     canvas?: HTMLCanvasElement;
     ni?: Element;
     no?: Element;
@@ -23,6 +23,10 @@ interface Options {
     posx?: number; // WebGL camera
     posy?: number; // WebGL camera
     posz?: number; // WebGL camera
+    maxSteps?: number; // WebGL, default 64
+    stepSize?: number; // WebGL, default 0.25
+    thresh?: number; // WebGL, default 0.2
+    devicePixelRatio?: number; // default 1
     pointRadius?: number; // default 1
     lineWidth?: number; // default 1, doesn't work anyway (WebGL limitation)
     /*
@@ -50,8 +54,12 @@ interface Options {
     baseType?: Array<number> | Float32Array | Float64Array;
     tot?: number;
     over?: Algebra;
+    fontSize: number;
 }
 
 interface Element {
 
 }
+
+// Fix TS
+declare function parseFloat(x: number | string): number;

@@ -496,6 +496,11 @@ export default function ElementExtendsGenerator(
         }
 
         // webGL2 Graphing function. (for OPNS/IPNS implicit 2D and 1D surfaces in 3D space).
+        /**
+         * 
+         * @param {*} f 
+         * @param {Options} options 
+         */
         static graphGL2(f, options) {
             // Create canvas, get webGL2 context.
             var canvas = document.createElement('canvas'); canvas.style.width = options.width || ''; canvas.style.height = options.height || ''; canvas.style.backgroundColor = '#EEE';
