@@ -1,3 +1,22 @@
+/**
+ * 
+ * @param {*} generator 
+ * @param {Options} options 
+ * @param {*} tot 
+ * @param {*} drm 
+ * @param {*} counts 
+ * @param {*} simplify 
+ * @param {*} basis 
+ * @param {*} p 
+ * @param {*} q 
+ * @param {*} r 
+ * @param {*} metric 
+ * @param {*} mulTable 
+ * @param {*} grades 
+ * @param {*} gp 
+ * @param {*} basisg 
+ */
+
 export default function ElementExtendsGenerator(
     generator,
     options,
@@ -19,9 +38,18 @@ export default function ElementExtendsGenerator(
     var res = class Element extends generator {
 
         // constructor - create a floating point array with the correct number of coefficients.
+        /**
+         * 
+         * @param {*} [a]
+         */
         constructor(a) { super(a); if (this.upgrade) this.upgrade(); return this; }
 
         // Grade selection. (implemented by parent class).
+        /**
+         * 
+         * @param {*} grade 
+         * @param {*} res 
+         */
         Grade(grade, res) { res = res || new Element(); return super.Grade(grade, res); }
 
         // Right and Left divide - Defined on the elements, shortcuts to multiplying with the inverse.
@@ -289,6 +317,13 @@ export default function ElementExtendsGenerator(
         //   graph(array)           => array of algebraic elements (points, lines, circles, segments, texts, colors, ..) is graphed.
         //   graph(function=>array) => same as above, for animation scenario's this function is called each frame.
         // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
+
+        /**
+         * 
+         * @param {*} f 
+         * @param {Options} options 
+         */
+
         static graph(f, options) {
             // Store the original input
             if (!f) return; var origf = f;
@@ -622,10 +657,18 @@ export default function ElementExtendsGenerator(
 
 
         // webGL Graphing function. (for parametric defined objects)
+        /**
+         * 
+         * @param {*} f 
+         * @param {Options} options
+         */
         static graphGL(f, options) {
             // Create a canvas, webgl2 context and set some default GL options.
             var canvas = document.createElement('canvas'); canvas.style.width = options.width || ''; canvas.style.height = options.height || ''; canvas.style.backgroundColor = '#EEE';
             if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height);
+            /**
+             * @type {WebGL2RenderingContext}
+             */
             var gl = canvas.getContext('webgl', { alpha: options.alpha || false, antialias: true, preserveDrawingBuffer: options.still || true, powerPreference: 'high-performance' });
             gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240 / 255, 240 / 255, 240 / 255, 1.0); gl.getExtension("OES_standard_derivatives"); gl.va = gl.getExtension("OES_vertex_array_object");
             // Compile vertex and fragment shader, return program.

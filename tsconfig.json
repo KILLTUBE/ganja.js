@@ -3,6 +3,7 @@
         "allowJs": true,
         "checkJs": true,
         "outDir": "./nowhere",
-        "target": "ES6"
+        "target": "ES6",
+        "noImplicitAny": true
     }
 }

@@ -1,4 +1,27 @@
-export default function MultiVectorExtendsFloat32Array(basis, options, simplify, grades, grade_start, tot, p, q, r) {
+/**
+ * 
+ * @param {*} basis 
+ * @param {Options} options 
+ * @param {*} simplify 
+ * @param {*} grades 
+ * @param {*} grade_start 
+ * @param {*} tot 
+ * @param {*} p 
+ * @param {*} q 
+ * @param {*} r 
+ */
+
+export default function MultiVectorExtendsFloat32Array(
+    basis,
+    options,
+    simplify,
+    grades,
+    grade_start,
+    tot,
+    p,
+    q,
+    r
+) {
 
 
     // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).

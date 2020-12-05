@@ -627,6 +627,11 @@
     //   graph(array)           => array of algebraic elements (points, lines, circles, segments, texts, colors, ..) is graphed.
     //   graph(function=>array) => same as above, for animation scenario's this function is called each frame.
     // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
+    /**
+     * 
+     * @param {*} f 
+     * @param {Options} options 
+     */
       static graph(f,options) {
       // Store the original input
         if (!f) return; var origf=f;

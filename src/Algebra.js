@@ -2,6 +2,13 @@ import MultiVectorExtendsFloat32Array from "./MultiVectorExtendsFloat32Array.js"
 import MultiVectorExtendsArray from "./MultiVectorExtendsArray.js";
 import ElementExtendsGenerator from "./ElementExtendsGenerator.js";
 
+/**
+ * 
+ * @param {Options} p 
+ * @param {*} [q]
+ * @param {*} [r]
+ */
+
 export default function Algebra(p,q,r) {
     // Resolve possible calling signatures so we know the numbers for p,q,r. Last argument can always be a function.
       var fu=arguments[arguments.length-1],options=p; if (options instanceof Object) {
