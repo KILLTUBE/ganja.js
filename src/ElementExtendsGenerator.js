@@ -1,3 +1,6 @@
+import Element_graph from "./Element_graph.js";
+import Element_graphGL2 from "./Element_graphGL2.js";
+
 /**
  * 
  * @param {*} generator 
@@ -308,356 +311,6 @@ export default function ElementExtendsGenerator(
                 return res;
             }
             return a;
-        }
-
-        // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
-        // It handles animation and interactivity.
-        //   graph(function(x))     => function of 1 parameter will be called with that parameter from -1 to 1 and graphed on a canvas. Returned values should also be in the [-1 1] range
-        //   graph(function(x,y))   => functions of 2 parameters will be called from -1 to 1 on both arguments. Returned values can be 0-1 for greyscale or an array of three RGB values.
-        //   graph(array)           => array of algebraic elements (points, lines, circles, segments, texts, colors, ..) is graphed.
-        //   graph(function=>array) => same as above, for animation scenario's this function is called each frame.
-        // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
-
-        /**
-         * 
-         * @param {*} f 
-         * @param {Options} options 
-         */
-
-        static graph(f, options) {
-            // Store the original input
-            if (!f) return; var origf = f;
-            // generate default options.
-            options = options || {}; options.scale = options.scale || 1; options.camera = options.camera || (tot < 4 ? Element.Scalar(1) : new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
-            if (options.conformal && tot == 4) var ni = options.ni || this.Coeff(4, 1, 3, 1), no = options.no || this.Coeff(4, 0.5, 3, -0.5), minus_no = no.Scale(-1);
-            var ww = options.width, hh = options.height, cvs = options.canvas, tpcam = new Element([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5, 0, 0, 1, 0]), tpy = this.Coeff(4, 1), tp = new Element(),
-                // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
-                project = (o) => { if (!o) return o; while (o.call) o = o(); return (tot == 4 && (o.length == 16)) ? (tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy) : (o.length == 2 ** tot) ? Element.sw(options.camera, o) : o; };
-            // gl escape.
-            if (options.gl && !(tot == 4 && options.conformal)) return Element.graphGL(f, options); if (options.up) return Element.graphGL2(f, options);
-            // if we get an array or function without parameters, we render c2d or p2d SVG points/lines/circles/etc
-            if (!(f instanceof Function) || f.length === 0) {
-                // Our current cursor, color, animation state and 2D mapping.
-                var lx, ly, lr, color, res, anim = false, to2d = (tot == 3) ? [0, 1, 2, 3, 4, 5, 6, 7] : [0, 7, 9, 10, 13, 12, 14, 15];
-                // Make sure we have an array of elements. (if its an object, convert to array with elements and names.)
-                if (f instanceof Function) f = f(); if (!(f instanceof Array)) f = [].concat.apply([], Object.keys(f).map((k) => typeof f[k] == 'number' ? [f[k]] : [f[k], k]));
-                // The build function generates the actual SVG. It will be called everytime the user interacts or the anim flag is set.
-                function build(f, or) {
-                    // Make sure we have an aray.
-                    if (or && f && f instanceof Function) f = f();
-                    // Reset position and color for cursor.
-                    lx = -2; ly = -1.85; lr = 0; color = '#444';
-                    // Create the svg element. (master template string till end of function)
-                    var svg = new DOMParser().parseFromString(`<SVG viewBox="-2 -${2 * (hh / ww || 1)} 4 ${4 * (hh / ww || 1)}" style="width:${ww || 512}px; height:${hh || 512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
-                // Add a grid (option)
-                ${options.grid ? (() => {
-                            var n = Math.floor(10 / options.scale);
-                            return n > 50 ? '' : [...Array(2 * n + 1)].map((x, xi) => `<line x1="-10" y1="${((xi - n) / 2 - (tot < 4 ? 2 * options.camera.e02 : 0)) * options.scale}" x2="10" y2="${((xi - n) / 2 - (tot < 4 ? 2 * options.camera.e02 : 0)) * options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi - n) / 2 - (tot < 4 ? 2 * options.camera.e01 : 0)) * options.scale}" y2="10" x2="${((xi - n) / 2 - (tot < 4 ? 2 * options.camera.e01 : 0)) * options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
-                        })() : ''}
-                // Handle conformal 2D elements.
-                ${options.conformal ? f.map && f.map((o, oidx) => {
-                            // Optional animation handling.
-                            if ((o == Element.graph && or !== false) || (oidx == 0 && options.animate && or !== false)) { anim = true; requestAnimationFrame(() => { var r = build(origf, (!res) || (document.body.contains(res))).innerHTML; if (res) res.innerHTML = r; }); if (!options.animate) return; }
-                            // Resolve expressions passed in.
-                            while (o.call) o = o();
-                            if (options.ipns && o instanceof Element) o = o.Dual;
-                            var sc = options.scale;
-                            var lineWidth = options.lineWidth || 1;
-                            var pointRadius = options.pointRadius || 1;
-                            var dash_for_r2 = (r2, render_r, target_width) => {
-                                // imaginary circles are dotted
-                                if (r2 >= 0) return 'none';
-                                var half_circum = render_r * Math.PI;
-                                var width = half_circum / Math.max(Math.round(half_circum / target_width), 1);
-                                return `${width} ${width}`;
-                            };
-                            // Arrays are rendered as segments or polygons. (2 or more elements)
-                            if (o instanceof Array) { lx = ly = lr = 0; o = o.map(o => { while (o.call) o = o(); return o.Scale(-1 / o.Dot(ni).s); }); o.forEach((o) => { lx += sc * (o.e1); ly += sc * (-o.e2) }); lx /= o.length; ly /= o.length; return o.length > 2 ? `<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o => (sc * o.e1 + ',' + (-o.e2 * sc) + ' '))}"/>` : `<LINE style="pointer-events:none" x1=${o[0].e1 * sc} y1=${-o[0].e2 * sc} x2=${o[1].e1 * sc} y2=${-o[1].e2 * sc} stroke="${color || '#888'}"/>`; }
-                            // Allow insertion of literal svg strings.
-                            if (typeof o == 'string' && o[0] == '<') { return o; }
-                            // Strings are rendered at the current cursor position.
-                            if (typeof o == 'string') { var res2 = (o[0] == '_') ? '' : `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize * 0.1 || 0.1}" style="pointer-events:none" fill="${color || '#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly += 0.14; return res2; }
-                            // Numbers change the current color.
-                            if (typeof o == 'number') { color = '#' + (o + (1 << 25)).toString(16).slice(-6); return ''; };
-                            // All other elements are rendered ..
-                            var ni_part = o.Dot(no.Scale(-1));  // O_i + n_o O_oi
-                            var no_part = ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
-                            if (ni_part.VLength * 1e-6 > no_part.VLength) {
-                                // direction or dual - nothing to render
-                                return "";
-                            }
-                            var no_ni_part = no_part.Dot(no.Scale(-1));  // O_oi
-                            var no_only_part = ni.Wedge(no_part).Dot(no.Scale(-1));  // O_o
-
-                            /* Note: making 1e-6 smaller increases the maximum circle radius before they are drawn as lines */
-                            if (no_ni_part.VLength * 1e-6 > no_only_part.VLength) {
-                                var is_flat = true;
-                                var direction = no_ni_part;
-                            }
-                            else {
-                                var is_flat = false;
-                                var direction = no_only_part;
-                            }
-                            // normalize to make the direction unitary
-                            var dl = direction.Length;
-                            o = o.Scale(1 / dl);
-                            direction = direction.Scale(1 / dl)
-
-                            var b0 = direction.Grade(0).VLength > 0.001, b1 = direction.Grade(1).VLength > 0.001, b2 = direction.Grade(2).VLength > 0.001;
-                            if (!is_flat && b0 && !b1 && !b2) {
-                                // Points
-                                if (direction.s < 0) { o = Element.Sub(o); }
-                                lx = sc * (o.e1); ly = sc * (-o.e2); lr = 0; return res2 = `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius * 0.03}" fill="${color || 'green'}"/>`;
-                            } else if (is_flat && !b0 && b1 && !b2) {
-                                // Lines.
-                                var loc = minus_no.LDot(o).Div(o), att = ni.Dot(o);
-                                lx = sc * (-loc.e1); ly = sc * (loc.e2); lr = Math.atan2(-o[14], o[13]) / Math.PI * 180; return `<LINE style="pointer-events:none" x1=${lx - 10} y1=${ly} x2=${lx + 10} y2=${ly} stroke="${color || '#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
-                            } else if (!is_flat && !b0 && !b1 && b2) {
-                                // Circles
-                                var loc = o.Div(ni.LDot(o)); lx = sc * (-loc.e1); ly = sc * (loc.e2);
-                                var r2 = o.Mul(o.Conjugate).s;
-                                var r = Math.sqrt(Math.abs(r2)) * sc;
-                                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" fill="none" stroke="${color || 'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth * 0.020)}"/>`;
-                            } else if (!is_flat && !b0 && b1 && !b2) {
-                                // Point Pairs.
-                                lr = 0; var ei = ni, eo = no, nix = o.Wedge(ei), sqr = o.LDot(o).s / nix.LDot(nix).s, r = Math.sqrt(Math.abs(sqr)), attitude = ((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos = o.Div(nix); pos = pos.Div(pos.LDot(Element.Sub(ei)));
-                                if (nix == 0) { pos = o.Dot(Element.Coeff(4, -1)); sqr = -1; }
-                                lx = sc * (pos.e1); ly = sc * (-pos.e2);
-                                if (sqr == 0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius * 0.03}" stroke-width="${lineWidth * 0.01}" fill="none" stroke="${color || 'green'}"/>`;
-                                // Draw imaginary pairs hollow
-                                if (sqr > 0) var fill = color || 'green', stroke = 'none', dash_array = 'none';
-                                else var fill = 'none', stroke = color || 'green';
-                                lx = sc * (pos.e1 + attitude.e1); ly = sc * (-pos.e2 - attitude.e2);
-                                var res2 = `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius * 0.03}" fill="${fill}" stroke-width="${lineWidth * 0.01}" stroke="${stroke}" stroke-dasharray="${dash_for_r2(sqr, pointRadius * 0.03, lineWidth * 0.020)}" />`;
-                                lx = sc * (pos.e1 - attitude.e1); ly = sc * (-pos.e2 + attitude.e2);
-                                return res2 + `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius * 0.03}" fill="${fill}" stroke-width="${lineWidth * 0.01}" stroke="${stroke}" stroke-dasharray="${dash_for_r2(sqr, pointRadius * 0.03, lineWidth * 0.020)}" />`;
-                            } else {
-                                /* Unrecognized */
-                                return "";
-                            }
-                            // Handle projective 2D and 3D elements.
-                        }) : f.map && f.map((o, oidx) => {
-                            if ((o == Element.graph && or !== false) || (oidx == 0 && options.animate && or !== false)) { anim = true; requestAnimationFrame(() => { var r = build(origf, (!res) || (document.body.contains(res))).innerHTML; if (res) res.innerHTML = r; }); if (!options.animate) return; } while (o instanceof Function) o = o(); o = (o instanceof Array) ? o.map(project) : project(o); if (o === undefined) return;
-                            // dual option dualizes before render
-                            if (options.dual && o instanceof Element) o = o.Dual;
-                            // line segments and polygons
-                            if (o instanceof Array && o.length) { lx = ly = lr = 0; o.forEach((o) => { while (o.call) o = o(); lx += options.scale * ((drm[1] == 6 || drm[1] == 14) ? -1 : 1) * o[drm[2]] / o[drm[1]]; ly += options.scale * o[drm[3]] / o[drm[1]] }); lx /= o.length; ly /= o.length; return o.length > 2 ? `<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o => ((drm[1] == 6 || drm[1] == 14) ? -1 : 1) * options.scale * o[drm[2]] / o[drm[1]] + ',' + options.scale * o[drm[3]] / o[drm[1]] + ' ')}"/>` : `<LINE style="pointer-events:none" x1=${options.scale * ((drm[1] == 6 || drm[1] == 14) ? -1 : 1) * o[0][drm[2]] / o[0][drm[1]]} y1=${options.scale * o[0][drm[3]] / o[0][drm[1]]} x2=${options.scale * ((drm[1] == 6 || drm[1] == 14) ? -1 : 1) * o[1][drm[2]] / o[1][drm[1]]} y2=${options.scale * o[1][drm[3]] / o[1][drm[1]]} stroke="${color || '#888'}"/>`; }
-                            // svg
-                            if (typeof o == 'string' && o[0] == '<') { return o; }
-                            // Labels
-                            if (typeof o == 'string') { var res2 = (o[0] == '_') ? '' : `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize * 0.1 || 0.1}" style="pointer-events:none" fill="${color || '#333'}" transform="rotate(${lr},0,0)">&nbsp;${o}&nbsp;</text>`; ly += 0.14; return res2; }
-                            // Colors
-                            if (typeof o == 'number') { color = '#' + (o + (1 << 25)).toString(16).slice(-6); return ''; };
-                            // Points
-                            if (o[to2d[6]] ** 2 > 0.0001) { lx = options.scale * o[drm[2]] / o[drm[1]]; if (drm[1] == 6 || drm[1] == 14) lx *= -1; ly = options.scale * o[drm[3]] / o[drm[1]]; lr = 0; var res2 = `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius * 0.03 || 0.03}" fill="${color || 'green'}"/>`; ly -= 0.05; lx -= 0.1; return res2; }
-                            // Lines
-                            if (o[to2d[2]] ** 2 + o[to2d[3]] ** 2 > 0.0001) { var l = Math.sqrt(o[to2d[2]] ** 2 + o[to2d[3]] ** 2); o[to2d[2]] /= l; o[to2d[3]] /= l; o[to2d[1]] /= l; lx = 0.5; ly = options.scale * ((drm[1] == 6) ? -1 : -1) * o[to2d[1]]; lr = -Math.atan2(o[to2d[2]], o[to2d[3]]) / Math.PI * 180; var res2 = `<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke="${color || '#888'}" transform="rotate(${lr},0,0)"/>`; ly -= 0.05; return res2; }
-                            // Vectors
-                            if (o[to2d[4]] ** 2 + o[to2d[5]] ** 2 > 0.0001) { lr = 0; ly += 0.05; lx += 0.1; var res2 = `<LINE style="pointer-events:none" x1=${lx} y1=${ly} x2=${lx - o.e02} y2=${ly + o.e01} stroke="${color || '#888'}"/>`; ly = ly + o.e01 / 4 * 3 - 0.05; lx = lx - o.e02 / 4 * 3; return res2; }
-                        }).join()}`, 'text/html').body;
-                    // return the inside of the created svg element.
-                    return svg.removeChild(svg.firstChild);
-                };
-                // Create the initial svg and install the mousehandlers.
-                res = build(f); res.value = f; res.options = options; res.setAttribute("stroke-width", options.lineWidth * 0.005 || 0.005);
-                //onmousedown="if(evt.target==this)this.sel=undefined" 
-                var mousex, mousey, cammove = false;
-                res.onmousedown = (e) => { if (e.target == res) res.sel = undefined; mousex = e.clientX; mousey = e.clientY; cammove = true; }
-                res.onmousemove = (e) => {
-                    if (cammove && tot == 4 && !options.conformal) {
-                        if (!e.buttons) { cammove = false; return; };
-                        var [dx, dy] = [e.clientX - mousex, e.clientY - mousey];
-                        [mousex, mousey] = [e.clientX, e.clientY];
-                        if (res.sel) {
-                            f[res.sel].set(Element.sw(Element.sw(options.camera.Reverse, Element.Bivector(-dx / 500, -dy / 500, 0, 0, 0, 0).Exp()), f[res.sel]));
-                        } else {
-                            if (options.camera) options.camera.set(options.camera.Mul(Element.Bivector(0, 0, 0, 1, 0, 0).Scale(dy / 600).Exp()).Mul(Element.Bivector(0, 0, 0, 0, 1, 0).Scale(dx / 300).Exp()))
-                        }
-                        return;
-                    }
-                    if (res.sel === undefined || !e.buttons) return;
-                    var resx = res.getBoundingClientRect().width, resy = res.getBoundingClientRect().height,
-                        x = ((e.clientX - res.getBoundingClientRect().left) / (resx / 4 || 128) - 2) * (resx > resy ? resx / resy : 1), y = ((e.clientY - res.getBoundingClientRect().top) / (resy / 4 || 128) - 2) * (resy > resx ? resy / resx : 1);
-                    x /= options.scale; y /= options.scale;
-                    if (options.conformal) { f[res.sel].set(this.Coeff(1, x, 2, -y).Add(no).Add(ni.Scale(0.5 * (x * x + y * y)))) }
-                    else { f[res.sel][drm[2]] = ((drm[1] == 6) ? -x : x) - ((tot < 4) ? 2 * options.camera.e01 : 0); f[res.sel][drm[3]] = y + ((tot < 4) ? 2 * options.camera.e02 : 0); f[res.sel][drm[1]] = 1; f[res.sel].set(f[res.sel].Normalized) }
-                    if (!anim) { var r = build(origf, (!res) || (document.body.contains(res))).innerHTML; if (res) res.innerHTML = r; }
-                    res.dispatchEvent(new CustomEvent('input'))
-                };
-                return res;
-            }
-            // 1d and 2d functions are rendered on a canvas.
-            cvs = cvs || document.createElement('canvas'); if (ww) cvs.width = ww; if (hh) cvs.height = hh; var w = cvs.width, h = cvs.height, context = cvs.getContext('2d'), data = context.getImageData(0, 0, w, h);
-            // two parameter functions .. evaluate for both and set resulting color.
-            if (f.length == 2) for (var px = 0; px < w; px++) for (var py = 0; py < h; py++) { var res = f(px / w * 2 - 1, py / h * 2 - 1); res = res.buffer ? [].slice.call(res) : res.slice ? res : [res, res, res]; data.data.set(res.map(x => x * 255).concat([255]), py * w * 4 + px * 4); }
-            // one parameter function.. go over x range, use result as y.
-            else if (f.length == 1) for (var px = 0; px < w; px++) { var res = f(px / w * 2 - 1); res = Math.round((res / 2 + 0.5) * h); if (res > 0 && res < h - 1) data.data.set([0, 0, 0, 255], res * w * 4 + px * 4); }
-            return context.putImageData(data, 0, 0), cvs;
-        }
-
-        // webGL2 Graphing function. (for OPNS/IPNS implicit 2D and 1D surfaces in 3D space).
-        /**
-         * 
-         * @param {*} f 
-         * @param {Options} options 
-         */
-        static graphGL2(f, options) {
-            // Create canvas, get webGL2 context.
-            var canvas = document.createElement('canvas'); canvas.style.width = options.width || ''; canvas.style.height = options.height || ''; canvas.style.backgroundColor = '#EEE';
-            if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width) * (options.devicePixelRatio || 1); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height) * (options.devicePixelRatio || 1);
-            var gl = canvas.getContext('webgl2', { alpha: options.alpha || false, preserveDrawingBuffer: true, antialias: true, powerPreference: 'high-performance' });
-            var gl2 = !!gl; if (!gl) gl = canvas.getContext('webgl', { alpha: options.alpha || false, preserveDrawingBuffer: true, antialias: true, powerPreference: 'high-performance' });
-            gl.clearColor(240 / 255, 240 / 255, 240 / 255, 1.0); gl.enable(gl.DEPTH_TEST); if (!gl2) { gl.getExtension("EXT_frag_depth"); gl.va = gl.getExtension('OES_vertex_array_object'); }
-            else gl.va = { createVertexArrayOES: gl.createVertexArray.bind(gl), bindVertexArrayOES: gl.bindVertexArray.bind(gl), deleteVertexArrayOES: gl.deleteVertexArray.bind(gl) }
-            // Compile vertex and fragment shader, return program.
-            var compile = (vs, fs) => {
-                var s = [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].map((t, i) => {
-                    var r = gl.createShader(t); gl.shaderSource(r, [vs, fs][i]); gl.compileShader(r);
-                    return gl.getShaderParameter(r, gl.COMPILE_STATUS) && r || console.error(gl.getShaderInfoLog(r));
-                });
-                var p = gl.createProgram(); gl.attachShader(p, s[0]); gl.attachShader(p, s[1]); gl.linkProgram(p);
-                gl.getProgramParameter(p, gl.LINK_STATUS) || console.error(gl.getProgramInfoLog(p));
-                return p;
-            };
-            // Create vertex array and buffers, upload vertices and optionally texture coordinates.
-            var createVA = function (vtx) {
-                var r = gl.va.createVertexArrayOES(); gl.va.bindVertexArrayOES(r);
-                var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
-                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(0);
-                return { r, b }
-            },
-                // Destroy Vertex array and delete buffers.
-                destroyVA = function (va) {
-                    if (va.b) gl.deleteBuffer(va.b); if (va.r) gl.va.deleteVertexArrayOES(va.r);
-                }
-            // Drawing function
-            var M = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 5, 1];
-            var draw = function (p, tp, vtx, color, color2, ratio, texc, va, b, color3, r, g) {
-                gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"), false, M);
-                gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"), false, [5, 0, 0, 0, 0, 5 * (ratio || 1), 0, 0, 0, 0, 1, 2, 0, 0, -1, 0])
-                gl.uniform3fv(gl.getUniformLocation(p, "color"), new Float32Array(color));
-                gl.uniform3fv(gl.getUniformLocation(p, "color2"), new Float32Array(color2));
-                if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"), new Float32Array(color3));
-                if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"), (new Float32Array(counts[g])).map((x, i) => b[g][i] || 0));
-                if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"), 0);
-                if (r) gl.uniform1f(gl.getUniformLocation(p, "ratio"), r);
-                var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOESOES(va.r);
-                gl.drawArrays(tp, 0, (va && va.tcount) || vtx.length / 3);
-                if (v) destroyVA(v);
-            }
-            // Compile the OPNS renderer. (sphere tracing)
-            var programs = [], genprog = grade => compile(`${gl2 ? "#version 300 es" : ""}
-                 ${gl2 ? "in" : "attribute"} vec4 position; ${gl2 ? "out" : "varying"} vec4 Pos; uniform mat4 mv; uniform mat4 p;
-                 void main() { Pos=mv*position; gl_Position = p*Pos; }`,
-                `${!gl2 ? "#extension GL_EXT_frag_depth : enable" : "#version 300 es"}
-                 precision highp float;
-                 uniform vec3 color; uniform vec3 color2;
-                 uniform vec3 color3; uniform float b[${counts[grade]}];
-                 uniform float ratio; ${gl2 ? "out vec4 col;" : ""}
-                 ${gl2 ? "in" : "varying"} vec4 Pos;
-                 float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
-                    ${this.nVector(1, []).OPNS_GLSL(this.nVector(grade, []), options.up)}
-                    return ${grade != tot - 1 ? "sign(sum)*sqrt(abs(sum))" : "res"};
-                 }
-                 vec3 trace_depth (in vec3 start, vec3 dir, in float thresh) {
-                    vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps || 64)};
-                    float s =  sign(dist(start[0],start[1],start[2],b));
-                    for (int i=0; i<count; i++) {
-                      float d = s*dist(start[0],start[1],start[2],b);
-                      if (d < thresh) return start - lastd*${(options.stepSize || 0.25)}*dir*(thresh-d)/(lastd-d);
-                      lastd = d; start += dir*${(options.stepSize || 0.25)}*d;
-                    }
-                    return orig;
-                 }
-                 void main() {
-                   vec3 p = -5.0*normalize(color2);
-                   vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
-                   vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-                   vec3 d2 = trace_depth( p , dir, ${grade != tot - 1 ? (options.thresh || 0.2) : "0.0075"} );
-                   float dl2 = dot(d2-p,d2-p); const float h=0.1;
-                   if (dl2>0.0) {
-                     vec3 n = normalize(vec3(
-                            dist(d2[0]+h,d2[1],d2[2],b)-dist(d2[0]-h,d2[1],d2[2],b),
-                            dist(d2[0],d2[1]+h,d2[2],b)-dist(d2[0],d2[1]-h,d2[2],b),
-                            dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
-                          ));
-                     ${gl2 ? "gl_FragDepth" : "gl_FragDepthEXT"} = dl2/50.0;
-                     ${gl2 ? "col" : "gl_FragColor"} = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),1.0);
-                   } else discard;
-                 }`), genprog2D = grade => compile(`${gl2 ? "#version 300 es" : ""}
-                 ${gl2 ? "in" : "attribute"} vec4 position; ${gl2 ? "out" : "varying"} vec4 Pos; uniform mat4 mv; uniform mat4 p;
-                 void main() { Pos=mv*position; gl_Position = p*Pos; }`,
-                    `${!gl2 ? "#extension GL_EXT_frag_depth : enable" : "#version 300 es"}
-                 precision highp float;
-                 uniform vec3 color; uniform vec3 color2;
-                 uniform vec3 color3; uniform float b[${counts[grade]}];
-                 uniform float ratio; ${gl2 ? "out vec4 col;" : ""}
-                 ${gl2 ? "in" : "varying"} vec4 Pos;
-                 float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
-                    ${this.nVector(1, []).OPNS_GLSL(this.nVector(grade, []), options.up)}
-                    return ${grade != tot - 1 ? "sqrt(abs(sum))" : "res"};
-                 }
-                 float trace_depth (in vec3 start, vec3 dir, in float thresh) {
-                    vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps || 64)};
-                    float s = dist(start[0]*5.0,start[1]*5.0,start[2]*5.0,b);
-                    s=s*s;
-                    return 1.0-s*150.0;
-                 }
-                 void main() {
-                   vec3 p = -5.0*normalize(color2);
-                   vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
-                   vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-                   float d2 = trace_depth( p , dir, ${grade != tot - 1 ? (options.thresh || 0.2) : "0.0075"} );
-                   if (d2>0.0) {
-                     ${gl2 ? "gl_FragDepth" : "gl_FragDepthEXT"} = d2/50.0;
-                     ${gl2 ? "col" : "gl_FragColor"} = vec4(d2*color3,d2);
-                   } else discard;
-                 }`)
-            // canvas update will (re)render the content.
-            var armed = 0;
-            canvas.update = (x) => {
-                // Start by updating canvas size if needed and viewport.
-                var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width) * (options.devicePixelRatio || 1); canvas.height = parseFloat(s.height) * (options.devicePixelRatio || 1); }
-                gl.viewport(0, 0, canvas.width | 0, canvas.height | 0); var r = canvas.width / canvas.height;
-                // Defaults, resolve function input
-                var a, p = [], l = [], t = [], c = [.5, .5, .5], alpha = 0, lastpos = [-2, 2, 0.2]; gl.clear(gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT); while (x.call) x = x();
-                // Loop over all items to render.
-                for (var i = 0, ll = x.length; i < ll; i++) {
-                    var e = x[i]; while (e && e.call) e = e(); if (e == undefined) continue;
-                    if (typeof e == "number") { alpha = ((e >>> 24) & 0xff) / 255; c[0] = ((e >>> 16) & 0xff) / 255; c[1] = ((e >>> 8) & 0xff) / 255; c[2] = (e & 0xff) / 255; }
-                    if (e instanceof Element) {
-                        var tt = options.spin ? -performance.now() * options.spin / 1000 : -options.h || 0; tt += Math.PI / 2; var r = canvas.height / canvas.width;
-                        var g = tot - 1; while (!e[g] && g > 1) g--;
-                        if (!programs[tot - 1 - g]) programs[tot - 1 - g] = (options.up.find(x => x.match && x.match("z"))) ? genprog(g) : genprog2D(g);
-                        gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-                        draw(programs[tot - 1 - g], gl.TRIANGLES, [-2, -2, 0, -2, 2, 0, 2, -2, 0, -2, 2, 0, 2, -2, 0, 2, 2, 0], [Math.cos(tt), 0, -Math.sin(tt)], [Math.sin(tt), 0, Math.cos(tt)], undefined, undefined, undefined, e, c, r, g);
-                        gl.disable(gl.BLEND);
-                    }
-                }
-                // if we're no longer in the page .. stop doing the work.
-                armed++; if (document.body.contains(canvas)) armed = 0; if (armed == 2) return;
-                canvas.value = x; if (options && !options.animate) canvas.dispatchEvent(new CustomEvent('input'));
-                if (options && options.animate) { requestAnimationFrame(canvas.update.bind(canvas, f, options)); }
-                if (options && options.still) { canvas.value = x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width = canvas.width; canvas.im.height = canvas.height; canvas.im.src = canvas.toDataURL(); }
-            }
-            // Basic mouse interactivity. needs more love.
-            var sel = -1; canvas.oncontextmenu = canvas.onmousedown = (e) => {
-                e.preventDefault(); e.stopPropagation(); sel = -2;
-                var rc = canvas.getBoundingClientRect(), mx = (e.x - rc.left) / (rc.right - rc.left) * 2 - 1, my = ((e.y - rc.top) / (rc.bottom - rc.top) * -4 + 2) * canvas.height / canvas.width;
-                canvas.onwheel = e => { e.preventDefault(); e.stopPropagation(); options.z = (options.z || 5) + e.deltaY / 100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas, f, options)); }
-                canvas.onmouseup = e => sel = -1; canvas.onmouseleave = e => sel = -1;
-                canvas.onmousemove = (e) => {
-                    var rc = canvas.getBoundingClientRect();
-                    var mx = (e.movementX) / (rc.right - rc.left) * 2, my = ((e.movementY) / (rc.bottom - rc.top) * -2) * canvas.height / canvas.width;
-                    if (sel == -2) { options.h = (options.h || 0) + mx; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas, f, options)); return; }; if (sel < 0) return;
-                }
-            }
-            canvas.value = f.call ? f() : f; canvas.options = options;
-            if (options && options.still) {
-                var i = new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas, f, options)), i;
-            } else return requestAnimationFrame(canvas.update.bind(canvas, f, options)), canvas;
-
         }
 
 
@@ -1231,6 +884,26 @@ export default function ElementExtendsGenerator(
             }
             // Glue all back together and return as bound function.
             return eval(('(' + (function f(t) { return t.map(t => t instanceof Array ? f(t) : typeof t == "string" ? t : "").join(''); })(translate(tok)) + ')'));
+        }
+
+        static graph(f, options) {
+            return Element_graph.bind(this)(
+                f,
+                options,
+                Element,
+                tot,
+                drm
+            );
+        }
+
+        static graphGL2(f, options) {
+            return Element_graphGL2.bind(this)(
+                f,
+                options,
+                Element,
+                tot,
+                counts
+            );
         }
     }
 
