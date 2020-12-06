@@ -132,17 +132,55 @@ export default function Element_graphGL2(
         var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width) * (options.devicePixelRatio || 1); canvas.height = parseFloat(s.height) * (options.devicePixelRatio || 1); }
         gl.viewport(0, 0, canvas.width | 0, canvas.height | 0); var r = canvas.width / canvas.height;
         // Defaults, resolve function input
-        var a, p = [], l = [], t = [], c = [.5, .5, .5], alpha = 0, lastpos = [-2, 2, 0.2]; gl.clear(gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT); while (x.call) x = x();
+        var a;
+        var p = [];
+        var l = [];
+        var t = [];
+        var c = [.5, .5, .5];
+        var alpha = 0;
+        var lastpos = [-2, 2, 0.2];
+        gl.clear(gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT);
+        while (x.call) {
+            x = x();
+        }
         // Loop over all items to render.
         for (var i = 0, ll = x.length; i < ll; i++) {
-            var e = x[i]; while (e && e.call) e = e(); if (e == undefined) continue;
-            if (typeof e == "number") { alpha = ((e >>> 24) & 0xff) / 255; c[0] = ((e >>> 16) & 0xff) / 255; c[1] = ((e >>> 8) & 0xff) / 255; c[2] = (e & 0xff) / 255; }
+            var e = x[i];
+            while (e && e.call) {
+                e = e();
+            }
+            if (e == undefined) {
+                continue;
+            }
+            if (typeof e == "number") {
+                alpha = ((e >>> 24) & 0xff) / 255;
+                c[0]  = ((e >>> 16) & 0xff) / 255;
+                c[1]  = ((e >>> 8 ) & 0xff) / 255;
+                c[2]  = ( e & 0xff) / 255;
+            }
             if (e instanceof Element) {
-                var tt = options.spin ? -performance.now() * options.spin / 1000 : -options.h || 0; tt += Math.PI / 2; var r = canvas.height / canvas.width;
-                var g = tot - 1; while (!e[g] && g > 1) g--;
-                if (!programs[tot - 1 - g]) programs[tot - 1 - g] = (options.up.find(x => x.match && x.match("z"))) ? genprog(g) : genprog2D(g);
-                gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-                draw(programs[tot - 1 - g], gl.TRIANGLES, [-2, -2, 0, -2, 2, 0, 2, -2, 0, -2, 2, 0, 2, -2, 0, 2, 2, 0], [Math.cos(tt), 0, -Math.sin(tt)], [Math.sin(tt), 0, Math.cos(tt)], undefined, undefined, undefined, e, c, r, g);
+                var tt = options.spin ? -performance.now() * options.spin / 1000 : -options.h || 0;
+                tt += Math.PI / 2;
+                var r = canvas.height / canvas.width;
+                var g = tot - 1;
+                while (!e[g] && g > 1) g--;
+                if (!programs[tot - 1 - g])
+                    programs[tot - 1 - g] = (options.up.find(x => x.match && x.match("z"))) ? genprog(g) : genprog2D(g);
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                draw(
+                    programs[tot - 1 - g],
+                    gl.TRIANGLES,
+                    [-2, -2, 0, -2, 2, 0, 2, -2, 0, -2, 2, 0, 2, -2, 0, 2, 2, 0],
+                    [Math.cos(tt), 0, -Math.sin(tt)], [Math.sin(tt), 0, Math.cos(tt)],
+                    undefined,
+                    undefined,
+                    undefined,
+                    e,
+                    c,
+                    r,
+                    g
+                );
                 gl.disable(gl.BLEND);
             }
         }
