@@ -134,6 +134,12 @@ export default function ElementExtendsGenerator(
         }
 
         // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Mul(a, b, res) {
             // Resolve expressions
             while (a.call && !a.length) {
@@ -146,76 +152,195 @@ export default function ElementExtendsGenerator(
                 return a.Mul(b, res);
             }
             // still functions -> experimental curry style (dont use this.)
-            if (a.call && b.call) return (ai, bi) => Element.Mul(a(ai), b(bi));
+            if (a.call && b.call) {
+                return (ai, bi) => Element.Mul(a(ai), b(bi));
+            }
             // scalar mul.
-            if (Number.isFinite(a) && b.Scale) return b.Scale(a); else if (Number.isFinite(b) && a.Scale) return a.Scale(b);
+            if (Number.isFinite(a) && b.Scale) {
+                return b.Scale(a);
+            }
+            else if (Number.isFinite(b) && a.Scale) {
+                return a.Scale(b);
+            }
             // Handle matrices and vectors.
             if ((a instanceof Array) && (b instanceof Array)) {
                 // vector times vector performs a dot product. (which internally uses the GP on each component)
-                if ((!(a[0] instanceof Array) || (a[0] instanceof Element)) && (!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r = tot ? Element.Scalar(0) : 0; a.forEach((x, i) => r = Element.Add(r, Element.Mul(x, b[i]), r)); return r; }
+                if (
+                    (!(a[0] instanceof Array) || (a[0] instanceof Element)) &&
+                    (!(b[0] instanceof Array) || (b[0] instanceof Element))
+                ) {
+                    var r = tot ? Element.Scalar(0) : 0; a.forEach((x, i) => r = Element.Add(r, Element.Mul(x, b[i]), r));
+                    return r;
+                }
                 // Array times vector
-                if (!(b[0] instanceof Array)) return a.map((x, i) => Element.Mul(a[i], b));
+                if (!(b[0] instanceof Array)) {
+                    return a.map((x, i) => Element.Mul(a[i], b));
+                }
                 // Array times Array
-                var r = a.map((x, i) => b[0].map((y, j) => { var r = tot ? Element.Scalar(0) : 0; x.forEach((xa, k) => r = Element.Add(r, Element.Mul(xa, b[k][j]))); return r; }));
+                var r = a.map(
+                    (x, i) => b[0].map((y, j) => {
+                        var r = tot ? Element.Scalar(0) : 0; x.forEach((xa, k) => r = Element.Add(r, Element.Mul(xa, b[k][j])));
+                        return r;
+                    })
+                );
                 // Return resulting array or scalar if 1 by 1.
-                if (r.length == 1 && r[0].length == 1) return r[0][0]; else return r;
+                if (r.length == 1 && r[0].length == 1) {
+                    return r[0][0];
+                } else {
+                    return r;
+                }
             }
             // Only one is an array multiply each of its elements with the other.
-            if ((a instanceof Array) ^ (b instanceof Array)) return (a instanceof Array) ? a.map(x => Element.Mul(x, b)) : b.map(x => Element.Mul(a, x));
+            if ((a instanceof Array) ^ (b instanceof Array)) {
+                return (a instanceof Array) ? a.map(x => Element.Mul(x, b)) : b.map(x => Element.Mul(a, x));
+            }
             // Try js multiplication, else call through to geometric product.
-            var r = a * b; if (!isNaN(r)) return r;
-            a = Element.toEl(a); b = Element.toEl(b); return a.Mul(b, res);
+            var r = a * b;
+            if (!isNaN(r)) {
+                return r;
+            }
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Mul(b, res);
         }
 
         // The inner product. (default is left contraction).
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static LDot(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); //if (a.LDot) return a.LDot(b,res);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            // if (a.LDot) {
+            //     return a.LDot(b,res);
+            // }
             // Map elements in array
-            if (b instanceof Array && !(a instanceof Array)) return b.map(x => Element.LDot(a, x));
-            if (a instanceof Array && !(b instanceof Array)) return a.map(x => Element.LDot(x, b));
+            if (b instanceof Array && !(a instanceof Array)) {
+                return b.map(x => Element.LDot(a, x));
+            }
+            if (a instanceof Array && !(b instanceof Array)) {
+                return a.map(x => Element.LDot(x, b));
+            }
             // js if numbers, else contraction product.
-            if (!(a instanceof Element || b instanceof Element)) return a * b;
-            a = Element.toEl(a); b = Element.toEl(b); return a.LDot(b, res);
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a * b;
+            }
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.LDot(b, res);
         }
 
         // The symmetric inner product. (default is left contraction).
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Dot(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); //if (a.LDot) return a.LDot(b,res);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            // if (a.LDot) {
+            //     return a.LDot(b,res);
+            // }
             // js if numbers, else contraction product.
-            if (!(a instanceof Element || b instanceof Element)) return a | b;
-            a = Element.toEl(a); b = Element.toEl(b); return a.Dot(b, res);
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a | b;
+            }
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Dot(b, res);
         }
 
         // The outer product. (Grassman product - no use of metric)
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Wedge(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); if (a.Wedge) return a.Wedge(Element.toEl(b), res);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            if (a.Wedge) {
+                return a.Wedge(Element.toEl(b), res);
+            }
             // The outer product of two vectors is a matrix .. internally Mul not Wedge !
-            if (a instanceof Array && b instanceof Array) return a.map(xa => b.map(xb => Element.Mul(xa, xb)));
+            if (a instanceof Array && b instanceof Array) {
+                return a.map(xa => b.map(xb => Element.Mul(xa, xb)));
+            }
             // js, else generated wedge product.
-            if (!(a instanceof Element || b instanceof Element)) return a * b;
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a * b;
+            }
             a = Element.toEl(a); b = Element.toEl(b); return a.Wedge(b, res);
         }
 
         // The regressive product. (Dual of the outer product of the duals).
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Vee(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); if (a.Vee) return a.Vee(Element.toEl(b), res);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            if (a.Vee) {
+                return a.Vee(Element.toEl(b), res);
+            }
             // js, else generated vee product. (shortcut for dual of wedge of duals)
-            if (!(a instanceof Element || b instanceof Element)) return 0;
-            a = Element.toEl(a); b = Element.toEl(b); return a.Vee(b, res);
+            if (!(a instanceof Element || b instanceof Element)) {
+                return 0;
+            }
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Vee(b, res);
         }
 
         // The sandwich product. Provided for convenience (>>> operator)
         static sw(a, b) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); if (a.sw) return a.sw(b);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            if (a.sw) {
+                return a.sw(b);
+            }
             // Map elements in array
-            if (b instanceof Array && !b.Add) return b.map(x => Element.sw(a, x));
+            if (b instanceof Array && !b.Add) {
+                return b.map(x => Element.sw(a, x));
+            }
             // Call through. no specific generated code for it so just perform the muls.
-            a = Element.toEl(a); b = Element.toEl(b); return a.Mul(b).Mul(a.Reverse);
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Mul(b).Mul(a.Reverse);
         }
 
         // Division - scalars or cal through to element method.
