@@ -61,5 +61,11 @@ interface Element {
 
 }
 
+type Input = Element | string | Array<any>;
+
 // Fix TS
 declare function parseFloat(x: number | string): number;
+
+interface Number {
+    call: any;
+}

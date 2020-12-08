@@ -1,6 +1,7 @@
 import Element_graph from "./Element_graph.js";
 import Element_graphGL from "./Element_graphGL.js";
 import Element_graphGL2 from "./Element_graphGL2.js";
+import Element_graph_arrows from "./Element_graph_arrows.js";
 import Element_inline from "./Element_inline.js";
 
 /**
@@ -100,37 +101,91 @@ export default function ElementExtendsGenerator(
         // Static operators. The parser will always translate operators to these static calls so that scalars, vectors, matrices and other non-multivectors can also be handled.
         // The static operators typically handle functions and matrices, calling through to element methods for multivectors. They are intended to be flexible and allow as many
         // types of arguments as possible. If performance is a consideration, one should use the generated element methods instead. (which only accept multivector arguments)
-        static toEl(x) { if (x instanceof Function) x = x(); if (!(x instanceof Element)) x = Element.Scalar(x); return x; }
-
-        // Addition and subtraction. Subtraction with only one parameter is negation.
-        static Add(a, b, res) {
-            // Resolve expressions passed in.
-            while (a.call) a = a(); while (b.call) b = b(); if (a.Add && b.Add) return a.Add(b, res);
-            // If either is a string, the result is a string.
-            if ((typeof a == 'string') || (typeof b == 'string')) return a.toString() + b.toString();
-            // If only one is an array, add the other element to each of the elements.
-            if ((a instanceof Array && !a.Add) ^ (b instanceof Array && !b.Add)) return (a instanceof Array) ? a.map(x => Element.Add(x, b)) : b.map(x => Element.Add(a, x));
-            // If both are equal length arrays, add elements one-by-one
-            if ((a instanceof Array) && (b instanceof Array) && a.length == b.length) return a.map((x, xi) => Element.Add(x, b[xi]));
-            // If they're both not elements let javascript resolve it.
-            if (!(a instanceof Element || b instanceof Element)) return a + b;
-            // Here we're left with scalars and multivectors, call through to generated code.
-            a = Element.toEl(a); b = Element.toEl(b); return a.Add(b, res);
+        static toEl(x) {
+            if (x instanceof Function)
+                x = x();
+            if (!(x instanceof Element))
+                x = Element.Scalar(x);
+            return x;
         }
 
+        // Addition and subtraction. Subtraction with only one parameter is negation.
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
+        static Add(a, b, res) {
+            // Resolve expressions passed in.
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            if (a.Add && b.Add) {
+                return a.Add(b, res);
+            }
+            // If either is a string, the result is a string.
+            if ((typeof a == 'string') || (typeof b == 'string')) {
+                return a.toString() + b.toString();
+            }
+            // If only one is an array, add the other element to each of the elements.
+            if ((a instanceof Array && !a.Add) ^ (b instanceof Array && !b.Add)) {
+                return (a instanceof Array) ? a.map(x => Element.Add(x, b)) : b.map(x => Element.Add(a, x));
+            }
+            // If both are equal length arrays, add elements one-by-one
+            if ((a instanceof Array) && (b instanceof Array) && a.length == b.length) {
+                return a.map((x, xi) => Element.Add(x, b[xi]));
+            }
+            // If they're both not elements let javascript resolve it.
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a + b;
+            }
+            // Here we're left with scalars and multivectors, call through to generated code.
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Add(b, res);
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Sub(a, b, res) {
             // Resolve expressions passed in.
-            while (a.call) a = a(); while (b && b.call) b = b(); if (a.Sub && b && b.Sub) return a.Sub(b, res);
+            while (a.call) {
+                a = a();
+            }
+            while (b && b.call) {
+                b = b();
+            }
+            if (a.Sub && b && b.Sub) {
+                return a.Sub(b, res);
+            }
             // If only one is an array, add the other element to each of the elements.
-            if (b && ((a instanceof Array) ^ (b instanceof Array))) return (a instanceof Array) ? a.map(x => Element.Sub(x, b)) : b.map(x => Element.Sub(a, x));
+            if (b && ((a instanceof Array) ^ (b instanceof Array))) {
+                return (a instanceof Array) ? a.map(x => Element.Sub(x, b)) : b.map(x => Element.Sub(a, x));
+            }
             // If both are equal length arrays, add elements one-by-one
-            if (b && (a instanceof Array) && (b instanceof Array) && a.length == b.length) return a.map((x, xi) => Element.Sub(x, b[xi]));
+            if (b && (a instanceof Array) && (b instanceof Array) && a.length == b.length) {
+                return a.map((x, xi) => Element.Sub(x, b[xi]));
+            }
             // Negation
-            if (arguments.length == 1) return Element.Mul(a, -1);
+            if (arguments.length == 1) {
+                return Element.Mul(a, -1);
+            }
             // If none are elements here, let js do it.
-            if (!(a instanceof Element || b instanceof Element)) return a - b;
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a - b;
+            }
             // Here we're left with scalars and multivectors, call through to generated code.
-            a = Element.toEl(a); b = Element.toEl(b); return a.Sub(b, res);
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Sub(b, res);
         }
 
         // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
@@ -291,7 +346,9 @@ export default function ElementExtendsGenerator(
             if (!(a instanceof Element || b instanceof Element)) {
                 return a * b;
             }
-            a = Element.toEl(a); b = Element.toEl(b); return a.Wedge(b, res);
+            a = Element.toEl(a);
+            b = Element.toEl(b);
+            return a.Wedge(b, res);
         }
 
         // The regressive product. (Dual of the outer product of the duals).
@@ -322,7 +379,16 @@ export default function ElementExtendsGenerator(
         }
 
         // The sandwich product. Provided for convenience (>>> operator)
+        /**
+         * 
+         * @param {Input} a 
+         * @param {Input} b 
+         * @returns {Element | Element[] | Array<any>}
+         */
         static sw(a, b) {
+            // Skip strings/colors
+            if (typeof b == "string" || typeof b =="number")
+                return b;
             // Expressions
             while (a.call) {
                 a = a();
@@ -344,83 +410,343 @@ export default function ElementExtendsGenerator(
         }
 
         // Division - scalars or cal through to element method.
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Div(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b();
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
             // For DDG experiments, I'll include a quick cholesky on matrices here. (vector/matrix)
             if ((a instanceof Array) && (b instanceof Array) && (b[0] instanceof Array)) {
                 // factor
-                var R = b.flat(), i, j, k, sum, i_n, j_n, n = b[0].length, s = new Array(n), x = new Array(n), yi;
+                var R = b.flat();
+                var i;
+                var j;
+                var k;
+                var sum;
+                var i_n;
+                var j_n;
+                var n = b[0].length;
+                var s = new Array(n);
+                var x = new Array(n);
                 for (i = 0; i < n; i++) {
                     i_n = i * n;
                     for (j = 0; j < i; j++) {
                         j_n = j * n;
                         s[j] = R[i_n + j];
-                        for (k = 0; k < j; k++) s[j] -= s[k] * R[j_n + k];
-                        if (R[j_n + j] == 0) return null;
+                        for (k = 0; k < j; k++) {
+                            s[j] -= s[k] * R[j_n + k];
+                        }
+                        if (R[j_n + j] == 0) {
+                            return null;
+                        }
                         R[i_n + j] = s[j] / R[j_n + j];
                     }
                     sum = R[i_n + i];
-                    for (k = 0; k < i; k++)  sum -= s[k] * R[i_n + k];
+                    for (k = 0; k < i; k++) {
+                        sum -= s[k] * R[i_n + k];
+                    }
                     R[i_n + i] = sum;
                 }
                 // subst
-                for (i = 0; i < n; i++) for (x[i] = a[i], j = 0; j <= i - 1; j++) x[i] -= R[i * n + j] * x[j];
-                for (i = n - 1; i >= 0; i--) for (x[i] /= R[i * n + i], j = i + 1; j < n; j++) x[i] -= R[j * n + i] * x[j];
+                for (i = 0; i < n; i++) {
+                    for (x[i] = a[i], j = 0; j <= i - 1; j++) {
+                        x[i] -= R[i * n + j] * x[j];
+                    }
+                }
+                for (i = n - 1; i >= 0; i--) {
+                    for (x[i] /= R[i * n + i], j = i + 1; j < n; j++) {
+                        x[i] -= R[j * n + i] * x[j];
+                    }
+                }
                 return x;
             }
             // js or call through to element divide.
-            if (!(a instanceof Element || b instanceof Element)) return a / b;
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a / b;
+            }
             a = Element.toEl(a);
-            if (Number.isFinite(b)) { return a.Scale(1 / b, res); }
-            b = Element.toEl(b); return a.Div(b, res);
+            if (Number.isFinite(b)) {
+                return a.Scale(1 / b, res);
+            }
+            b = Element.toEl(b);
+            return a.Div(b, res);
         }
 
         // Pow - needs obvious extensions for natural powers. (exponentiation by squaring)
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         * @param {*} res 
+         */
         static Pow(a, b, res) {
             // Expressions
-            while (a.call) a = a(); while (b.call) b = b(); if (a.Pow) return a.Pow(b, res);
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            if (a.Pow) {
+                return a.Pow(b, res);
+            }
             // Exponentiation.
-            if (a === Math.E && b.Exp) return b.Exp();
+            if (a === Math.E && b.Exp) {
+                return b.Exp();
+            }
             // Squaring
-            if (b === 2) return this.Mul(a, a, res);
+            if (b === 2) {
+                return this.Mul(a, a, res);
+            }
             // No elements, call through to js
-            if (!(a instanceof Element || b instanceof Element)) return a ** b;
+            if (!(a instanceof Element || b instanceof Element)) {
+                return a ** b;
+            }
             // Inverse
-            if (b === -1) return a.Inverse;
+            if (b === -1) {
+                return a.Inverse;
+            }
             // Call through to element pow.
-            a = Element.toEl(a); return a.Pow(b);
+            a = Element.toEl(a);
+            return a.Pow(b);
         }
 
         // Handles scalars and calls through to element method.
+        /**
+         * 
+         * @param {*} a 
+         */
         static exp(a) {
             // Expressions.
-            while (a.call) a = a();
+            while (a.call) {
+                a = a();
+            }
             // If it has an exp callthrough, use it, else call through to math.
-            if (a.Exp) return a.Exp();
+            if (a.Exp) {
+                return a.Exp();
+            }
             return Math.exp(a);
         }
 
         // Dual, Involute, Reverse, Conjugate, Normalize and length, all direct call through. Conjugate handles matrices.
-        static Dual(a) { return Element.toEl(a).Dual; };
-        static Involute(a) { return Element.toEl(a).Involute; };
-        static Reverse(a) { return Element.toEl(a).Reverse; };
-        static Conjugate(a) { if (a.Conjugate) return a.Conjugate; if (a instanceof Array) return a[0].map((c, ci) => a.map((r, ri) => Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
-        static Normalize(a) { return Element.toEl(a).Normalized; };
-        static Length(a) { return Element.toEl(a).Length };
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Dual(a) {
+            return Element.toEl(a).Dual;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Involute(a) {
+            return Element.toEl(a).Involute;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Reverse(a) {
+            return Element.toEl(a).Reverse;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Conjugate(a) {
+            if (a.Conjugate) {
+                return a.Conjugate;
+            }
+            if (a instanceof Array) {
+                return a[0].map((c, ci) => a.map((r, ri) => Element.Conjugate(a[ri][ci])));
+            }
+            return Element.toEl(a).Conjugate;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Normalize(a) {
+            return Element.toEl(a).Normalized;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         */
+        static Length(a) {
+            return Element.toEl(a).Length
+        }
 
         // Comparison operators always use length. Handle expressions, then js or length comparison
-        static eq(a, b) { if (!(a instanceof Element) || !(b instanceof Element)) return a == b; while (a.call) a = a(); while (b.call) b = b(); for (var i = 0; i < a.length; i++) if (a[i] != b[i]) return false; return true; }
-        static neq(a, b) { if (!(a instanceof Element) || !(b instanceof Element)) return a != b; while (a.call) a = a(); while (b.call) b = b(); for (var i = 0; i < a.length; i++) if (a[i] != b[i]) return true; return false; }
-        static lt(a, b) { while (a.call) a = a(); while (b.call) b = b(); return (a instanceof Element ? a.Length : a) < (b instanceof Element ? b.Length : b); }
-        static gt(a, b) { while (a.call) a = a(); while (b.call) b = b(); return (a instanceof Element ? a.Length : a) > (b instanceof Element ? b.Length : b); }
-        static lte(a, b) { while (a.call) a = a(); while (b.call) b = b(); return (a instanceof Element ? a.Length : a) <= (b instanceof Element ? b.Length : b); }
-        static gte(a, b) { while (a.call) a = a(); while (b.call) b = b(); return (a instanceof Element ? a.Length : a) >= (b instanceof Element ? b.Length : b); }
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static eq(a, b) {
+            if (!(a instanceof Element) || !(b instanceof Element)) {
+                return a == b;
+            }
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            for (var i = 0; i < a.length; i++) {
+                if (a[i] != b[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static neq(a, b) {
+            if (!(a instanceof Element) || !(b instanceof Element)) {
+                return a != b;
+            }
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            for (var i = 0; i < a.length; i++) {
+                if (a[i] != b[i]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static lt(a, b) {
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            return (a instanceof Element ? a.Length : a) < (b instanceof Element ? b.Length : b);
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static gt(a, b) {
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            return (a instanceof Element ? a.Length : a) > (b instanceof Element ? b.Length : b);
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static lte(a, b) {
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            return (a instanceof Element ? a.Length : a) <= (b instanceof Element ? b.Length : b);
+        }
+
+        /**
+         * 
+         * @param {*} a 
+         * @param {*} b 
+         */
+        static gte(a, b) {
+            while (a.call) {
+                a = a();
+            }
+            while (b.call) {
+                b = b();
+            }
+            return (a instanceof Element ? a.Length : a) >= (b instanceof Element ? b.Length : b);
+        }
 
         // Debug output and printing multivectors.
-        static describe(x) { if (x === true) console.log(`Basis\n${basis}\nMetric\n${metric.slice(1, 1 + tot)}\nCayley\n${mulTable.map(x => (x.map(x => ('           ' + x).slice(-2 - tot)))).join('\n')}\nMatrix Form:\n` + gp.map(x => x.map(x => x.match(/(-*b\[\d+\])/)).map(x => x && ((x[1].match(/-/) || ' ') + String.fromCharCode(65 + 1 * x[1].match(/\d+/))) || ' 0')).join('\n')); return { basis: basisg || basis, metric, mulTable, matrix: gp.map(x => x.map(x => x.replace(/\*this\[.+\]/, '').replace(/b\[(\d+)\]/, (a, x) => (metric[x] == -1 || metric[x] == 0 && grades[x] > 1 && (-1) ** grades[x] == (metric[basis.indexOf(basis[x].replace('0', ''))] || (-1) ** grades[x]) ? '-' : '') + basis[x]).replace('--', ''))) } }
+        /**
+         * 
+         * @param {*} x 
+         */
+        static describe(x) {
+            if (x === true) {
+                let strMetric = metric.slice(1, 1 + tot);
+                let strCayley = mulTable.map(
+                    x => (
+                        x.map(x => ('           ' + x).slice(-2 - tot))
+                    )
+                ).join('\n');
+                let strMatrixForm = gp.map(
+                    x => x.map(
+                        x => x.match(/(-*b\[\d+\])/)
+                    ).map(
+                        x => x && ((x[1].match(/-/) || ' ') + String.fromCharCode(65 + 1 * x[1].match(/\d+/))) || ' 0'
+                    )
+                    ).join('\n');
+                console.log(`Basis\n${basis}\nMetric\n${strMetric}\nCayley\n${strCayley}\nMatrix Form:\n${strMatrixForm}`);
+            }
+            return {
+                basis: basisg || basis,
+                metric,
+                mulTable,
+                matrix: gp.map(
+                    x => x.map(
+                        x => x.replace(/\*this\[.+\]/, '').replace(/b\[(\d+)\]/,
+                        (a, x) => (
+                            metric[x] == -1 ||
+                            metric[x] == 0 &&
+                            grades[x] > 1 &&
+                            (-1) ** grades[x] == (
+                                metric[basis.indexOf(basis[x].replace('0', ''))] || (-1) ** grades[x]
+                            ) ? '-' : ''
+                        ) + basis[x]).replace('--', '')
+                    )
+                )
+            }
+        }
 
         // Direct sum of algebras - experimental
+        /**
+         * 
+         * @param {*} B 
+         */
         static sum(B) {
             var A = Element;
             // Get the multiplication tabe and basis.
@@ -474,7 +800,8 @@ export default function ElementExtendsGenerator(
          */
         static graph(f, options) {
             // console.log("graph");
-            return Element_graph.bind(this)(
+            //return Element_graph.bind(this)(
+            return Element_graph_arrows.bind(this)(
                 f,
                 options,
                 Element,
