@@ -100,8 +100,20 @@
   <!--
     <SCRIPT SRC="../ganja.js"></SCRIPT>
   -->
+  <script>
+    function preventAccidentalReload() {
+      // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+      window.addEventListener('beforeunload', function (e) {
+        // Cancel the event
+        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        e.returnValue = '';
+      });
+    }
+    preventAccidentalReload();
+  </script>
   <SCRIPT type="module">
-    import Algebra123 from "../src/index.js";
+    import "../src/index.js";
   </SCRIPT>
   <!-- ace editor -->
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
@@ -204,7 +216,7 @@
         <DIV CLASS="sampleGroup game">Game</DIV>                                                                 <DIV CLASS="group game"></DIV>
         <DIV CLASS="inspect">
           <INPUT TYPE="edit" ID="editJSON"></INPUT>
-          <INPUT TYPE="button" ID="copyJSON" VALUE="Copy JSON to clipboard."</INPUT>
+          <INPUT TYPE="button" ID="copyJSON" VALUE="Copy JSON to clipboard."></INPUT>
           <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
             <THEAD>
               <TR><TH WIDTH="30px">#<TH WIDTH="30px">Grade<TH>Name<TH WIDTH="80%">Value
