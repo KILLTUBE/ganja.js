@@ -423,397 +423,488 @@
       hello
     })
 
+/**
+ * Mode 0: Real Numbers
+ * Mode 1: Complex Numbers
+ * Mode 2: Minkowski spacetime
+ * Mode 3: P2D (2,0,1)
+ * Mode 4: P3D (3,0,1)
+ * Mode 5: C2D (3,1)
+ * Mode 6: C3D (4,1)
+ * Mode 7: Dual Numbers
+ */
+
+    function buttonR() {
+      E();
+      e();
+      Al=Algebra();
+      graph.style.opacity=0.3;
+      hist.style.visibility='visible';
+      mode=0;
+      title.innerHTML="<SPAN CLASS='outline'>R</SPAN>";
+    }
+
+    var buttonC = () => {
+      mode=1;
+      E();
+      e(0,1,0,0,0,0);
+      Al=Algebra(0,1);
+      graph.style.opacity = 0.3;
+      hist.style.visibility='visible';
+      title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>";
+    }
+
+    var buttonD = () => {
+      mode=7;
+      E();
+      e(1,0,0,0,0,0);
+      Al=Algebra(0,0,1);
+      graph.style.opacity=0.3;
+      hist.style.visibility='visible';
+      title.innerHTML = "<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>";
+    }
+
+    var buttonM = () => {
+      mode=2;
+      E(0,1,1,1,1,0);
+      Al=Algebra(1,3);
+      graph.style.opacity=0.3;
+      hist.style.visibility='visible';
+      title.innerHTML = "<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>";
+    }
+
+    var buttonP2D = () => {
+      mode=3;
+      E(1,1,1,0,0,0);
+      Al = Algebra(2,0,1);
+      graph.style.opacity = 1;
+      hist.style.visibility='visible';
+      title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)";
+    }
+
+    var buttonP3D = () => {
+      mode=4;
+      E(1,1,1,1,0,0);
+      Al=Algebra(3,0,1);
+      graph.style.opacity=1;
+      hist.style.visibility='visible';
+      title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";
+    }
+
+    var buttonC2D = () => {
+      mode=5;
+      E(0,1,1,1,1,0);
+      Al=Algebra(3,1,0);
+      graph.style.opacity=1;
+      hist.style.visibility='visible';
+      title.innerHTML = "C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";
+    }
+
+    var buttonC3D = () => {
+      mode=6;
+      E(0,1,1,1,1,1);
+      Al=Algebra(4,1,0);
+      graph.style.opacity=0.3;
+      hist.style.visibility='visible';
+      title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";
+    }
+
+    var button_e0 = () => {
+      cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0';
+      show(cur);
+    }
+
+    var button_e1 = () => {
+      cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1';
+      show(cur);
+    }
+
+    var button_e2 = () => {
+      cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?'e2':'1e2';
+      show(cur);
+    }
+
+    var button_e3 = () => {
+      cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?'e3':'1e3';
+      show(cur);
+    }
+
+    var button_e4 = () => {
+      cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?'e4':'1e4';
+      show(cur);
+    }
+
+    var button_e5 = () => {
+      cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?'e5':'1e5';
+      show(cur);
+    }
+
+    var button_ori = () => {
+      cur += (cur.match(/\d$/)?'*':'')+'(.5e3+.5e4)';
+      show(cur);
+    }
+
+    var button_help = () => {
+      print('Click any button for help.');
+      help = true;
+    }
+
+    var button_E0 = () => {
+      var s=Al.inline('1e0.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_E1 = () => {
+      var s=Al.inline('1e1.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_E2 = () => {
+      var s=Al.inline('1e2.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_E3 = () => {
+      var s=Al.inline('1e3.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_E4 = () => {
+      var s = Al.inline('1e4.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_E5 = () => {
+      var s = Al.inline('1e5.Dual')().toString().replace('_','');
+      cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s);
+      show(cur);
+    }
+
+    var button_inf = () => {
+      cur += (cur.match(/\d$/)?'*':'')+'(1e4-1e3)';
+      show(cur);
+    }
+
+    var button_st = () => {
+      store = true;
+    }
+
+    var button_pss = () => {
+      cur = cur.match(/\d+$/)?'':'1'+['','e1','e1234','e012','e0123','e1234','e12345'][mode];
+      show(cur);
+    }
+
+    var button_inv = () => {
+      cur += '**-1';
+      show(cur);
+    }
+
+    var button_up = () => {
+      cur += '';
+      show(cur);
+    }
+
+    var button_dwn = () => {
+      cur += '';
+      show(cur);
+    }
+
+    var button_dual = () => {
+      cur += '.Dual';
+      show(cur);
+    }
+
+    var button_rev = () => {
+      cur += '.Reverse';
+      show(cur);
+    }
+
+    var button_x1 = () => {
+      if (store) {
+        store = false;
+        x1 = Al.inline(new Function('return '+cur))();
+        patch('x1='+x1.toString());
+        return show(cur);
+      }
+      cur += 'x1';
+      show(cur);
+    }
+
+    var button_x6 = () => {
+      if (store) {
+        store = false;
+        x6 = Al.inline(new Function('return '+cur))();
+        patch('x6='+x6.toString());
+        return show(cur);
+      }
+      cur += 'x6';
+      show(cur);
+    }
+
+    var button_7 = () => {
+      cur += '7';
+      show(cur);
+    }
+    
+    var button_8 = () => {
+      cur += '8';
+      show(cur);
+    }
+
+    var button_9 = () => {
+      cur += '9';
+      show(cur);
+    }
+
+    var button_substract = () => {
+      cur += '-';
+      show(cur);
+    }
+    
+    var button_divide = () => {
+      cur += '/';
+      show(cur);
+    }
+
+    var button_exponentiate = () => {
+      cur += '.Exp()';
+      show(cur);
+    }
+
+    var button_x2 = () => {
+      if (store) {
+        store = false;
+        x2=Al.inline(new Function('return '+cur))();
+        patch('x2='+x2.toString());
+        return show(cur);
+      }
+      cur += 'x2';
+      show(cur);
+    }
+
     // Our calculator buttons.   
     var buttons = {
     // metric selection.
       "R" : {
         color:'green',
         label : "<SPAN CLASS='outline'>R</SPAN>",
-        click : () => {
-          E();
-          e();
-          Al=Algebra();
-          graph.style.opacity=0.3;
-          hist.style.visibility='visible';
-          mode=0;
-          title.innerHTML="<SPAN CLASS='outline'>R</SPAN>";
-        },
+        click : buttonR,
         help: "<I CLASS='outline'>R</I>: Real Numbers."
       },
       "C" : {
         color:'green',
         label: "<SPAN CLASS='outline'>C</SPAN><DIV CLASS='mini'>0,1</DIV>",
-        click: () => {
-          mode=1;
-          E();
-          e(0,1,0,0,0,0);
-          Al=Algebra(0,1);
-          graph.style.opacity = 0.3;
-          hist.style.visibility='visible';
-          title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>";
-        },
+        click: buttonC,
         help: '<I CLASS="outline">C</I>: Complex Numbers.'
       },
       "D" : {
         color:'green',
         label : "<SPAN CLASS='outline'>D</SPAN><DIV CLASS='mini'>0,0,1</DIV>",
-        click : () => {
-          mode=7;
-          E();
-          e(1,0,0,0,0,0);
-          Al=Algebra(0,0,1);
-          graph.style.opacity=0.3;
-          hist.style.visibility='visible';
-          title.innerHTML = "<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>";
-        },
+        click : buttonD,
         help: '<I CLASS="outline">D</I>: Dual Numbers.'
       },
       "M" : {
         color:'green',
         label : "<SPAN CLASS='outline'>M</SPAN><DIV CLASS='mini'>1,3</DIV>",
-        click : () => {
-          mode=2;
-          E(0,1,1,1,1,0);
-          Al=Algebra(1,3);
-          graph.style.opacity=0.3;
-          hist.style.visibility='visible';
-          title.innerHTML = "<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; }, help:'<I CLASS="outline">M</I> : <I CLASS="outline">R</I><SUB>1,3</SUB> : Minkowski spacetime.'
+        click : buttonM,
+        help:'<I CLASS="outline">M</I> : <I CLASS="outline">R</I><SUB>1,3</SUB> : Minkowski spacetime.'
       },
       "P2D" : {
         color:'green',
         label : "P2D<DIV CLASS='mini'>2,0,1</DIV>",
-        click : () => {
-          mode=3;
-          E(1,1,1,0,0,0);
-          Al = Algebra(2,0,1);
-          graph.style.opacity = 1;
-          hist.style.visibility='visible';
-          title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)";
-        },
+        click : buttonP2D,
         help: toHelp(`PGA2D Cheat Sheet<HR><TABLE CLASS="help" STYLE="position:relative; display:table" WIDTH=100%><TR><TD>point at (x,y)<TD>E0_-xE1_+yE2<TR><TD>line ax + by + c = 0<TD>ae1_+be2_+ce0<TR><TD>join points P,Q<TD>P_&Q<TR><TD>intersect lines a,b<TD>a_^b<TR><TD>line through P ortho to a<TD>a_.P<TR><TD>project P onto a<TD>a_.P_*a<TR><TD>line through P parallel to a<TD>a_.P_*P<TR><TD>Rotator &alpha; around P<TD>_(&alpha;_*P_/<i>2</i>_)<i style="width:40px" class="blue">exp</i><TR><TD>Motor x,y<TD><i>1</i>_+xE1_+yE2</TABLE><HR>`)
       },
       "P3D" : {
         color:'green',
         label: "P3D<DIV CLASS='mini'>3,0,1</DIV>",
-        click : () => {
-          mode=4;
-          E(1,1,1,1,0,0);
-          Al=Algebra(3,0,1);
-          graph.style.opacity=1;
-          hist.style.visibility='visible';
-          title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";
-        },
+        click : buttonP3D,
         help: toHelp(`PGA3D Cheat Sheet<HR><TABLE CLASS="help" STYLE="position:relative; display:table" WIDTH=100%><TR><TD>point at (x,y,z)<TD>E0_-xE1_+yE2_+zE3<TR><TD>plane ax + by + cz + d = 0<TD>ae1_+be2_+ce3_+de0<TR><TD>join elements x,y<TD>x_&y<TR><TD>intersect elements x,y<TD>x_^y<TR><TD>plane through P ortho to a<TD>a_.P<TR><TD>project x onto y<TD>x_.y_*y<TR><TD>plane through P parallel to a<TD>a_.P_*P<TR><TD>Rotator &alpha; around L<TD>_(&alpha;_*L_/<i>2</i>_)<i style="width:40px" class="blue">exp</i><TR><TD>Motor x*2,y*2,z*2<TD><i>1</i>_+xE1_+yE2_+zE3</TABLE><HR>`)
       },
       "C2D" : {
         color:'green',
         label : "C2D<DIV CLASS='mini'>3,1</DIV>",
-        click : () => {
-          mode=5;
-          E(0,1,1,1,1,0);
-          Al=Algebra(3,1,0);
-          graph.style.opacity=1;
-          hist.style.visibility='visible';
-          title.innerHTML = "C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";
-        },
+        click : buttonC2D,
         help:"C(<I CLASS='outline'>R</I><SUB>3,1</SUB>): Conformal 2D Geometric Algebra."
       },
       "C3D" : {
         color:'green',
         label : "C3D<DIV CLASS='mini'>4,1</DIV>",
-        click : () => {
-          mode=6;
-          E(0,1,1,1,1,1);
-          Al=Algebra(4,1,0);
-          graph.style.opacity=0.3;
-          hist.style.visibility='visible';
-          title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";
-        },
+        click : buttonC3D,
         help: "C(<I CLASS='outline'>R</I><SUB>4,1</SUB>): Conformal 3D Geometric Algebra."
       },
       // basis vectors + store
       "e0" :  {
         label: "e0",
-        click: () => {
-          cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0';
-          show(cur);
-        },
+        click: button_e0,
         help: "e<sub>0</sub> basisvector."
       },
       "e1" :  {
         label : "e1",
-        click : () => {
-          cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1';
-          show(cur);
-        },
+        click : button_e1,
         help: "e<sub>1</sub> basisvector."
       },
       "e2" :  {
         label : "e2",
-        click : () => {
-          cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?'e2':'1e2';
-          show(cur);
-        },
+        click : button_e2,
         help: "e<sub>2</sub> basisvector."
       },
       "e3" :  {
         label : "e3",
-        click : () => {
-          cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?'e3':'1e3';
-          show(cur);
-        },
+        click : button_e3,
         help: "e<sub>3</sub> basisvector."
       },
       "e4" :  {
         label : "e4",
-        click : () => {
-          cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?'e4':'1e4';
-          show(cur);
-        },
+        click : button_e4,
         help: "e<sub>4</sub> basisvector."
       },
       "e5" :  {
         label : "e5",
-        click : () => {
-          cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?'e5':'1e5';
-          show(cur);
-        },
+        click : button_e5,
         help: "e<sub>5</sub> basisvector."
       },
       "ori":  {
         label: "ori",
-        click : () => {
-          cur += (cur.match(/\d$/)?'*':'')+'(.5e3+.5e4)';
-          show(cur);
-        },
+        click : button_ori,
         help: "origin : 0.5e<sub>+</sub> + 0.5e<sub>-</sub>"
       },
       "_?" :  {
         color:'blue',
         label : "?",
-        click : () => {
-          print('Click any button for help.');
-          help = true;
-        },
+        click : button_help,
         help: "Click help and any button for more help."
       },
       // basis dual vectors + x1
       "E0" :  {
         label : "E0",
-        click : () => {
-          var s=Al.inline('1e0.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click : button_E0,
         help: "dual of e<sub>0</sub> basisvector."
       },
       "E1" :  {
         label : "E1",
-        click : () => {
-          var s=Al.inline('1e1.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click : button_E1,
         help:"dual of e<sub>1</sub> basisvector."
       },
       "E2" :  {
         label : "E2",
-        click : () => {
-          var s=Al.inline('1e2.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click : button_E2,
         help: "dual of e<sub>2</sub> basisvector."
       },
       "E3": {
         label: "E3",
-        click: () => {
-          var s=Al.inline('1e3.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click: button_E3,
         help: "dual of e<sub>3</sub> basisvector."
       },
       "E4": {
         label : "E4",
-        click : () => {
-          var s = Al.inline('1e4.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click : button_E4,
         help:"dual of e<sub>4</sub> basisvector."
       },
       "E5" :  {
         label : "E5",
-        click : () => {
-          var s = Al.inline('1e5.Dual')().toString().replace('_','');
-          cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s);
-          show(cur);
-        },
+        click : button_E5,
         help:"dual of e<sub>5</sub> basisvector."
       },
       "inf":  {
         label : "inf",
-        click : () => {
-          cur += (cur.match(/\d$/)?'*':'')+'(1e4-1e3)';
-          show(cur);
-        },
+        click : button_inf,
         help: "infinity : e<sub>-</sub> - e<sub>+</sub>"
       },
       "st" :  {
         color:'purple',
         label : "st",
-        click : () => {
-          store = true;
-        },
+        click : button_st,
         help: "ST : Store variable. (follow by x1 to x10)"
       },
       // pss, dual, reverse, .. 
       "pss":  {
         label : "pss",
-        click : () => {
-          cur = cur.match(/\d+$/)?'':'1'+['','e1','e1234','e012','e0123','e1234','e12345'][mode];
-          show(cur);
-        },
+        click : button_pss,
         help: "Pseudo-Scalar"
       },
       "inv":  {
         color:'blue',
         label : "x<sup>-1</sup>",
-        click : () => {
-          cur += '**-1';
-          show(cur);
-        },
+        click : button_inv,
         help:"Inverse"
       },
       "up":   {
         color:'blue',
         label : "&#x21E7;",
-        click : () => {
-          cur += '';
-          show(cur);
-        },
+        click : button_up,
         help: "from euclidean to conformal space"
       },
       "dwn":  {
         color: 'blue',
         label : "&#x21E9",
-        click  : () => {
-          cur += '';
-          show(cur);
-        },
+        click  : button_dwn,
         help:"from conformal to euclidean space"
       },
       "dual": {
         color:'blue',
         label : "Dual",
-        click : () => {
-          cur += '.Dual';
-          show(cur);
-        },
+        click : button_dual,
         help: "Multivector Dual"
       },
       "rev":  {
         color:'blue',
         label : "Rev",
-        click : () => {
-          cur += '.Reverse';
-          show(cur);
-        },
+        click : button_rev,
         help: "Multivector Reverse"
       },
       "x1" :  {
         color:'purple',
         label : "x<sub>1</sub>",
-        click : () => {
-          if (store) {
-            store = false;
-            x1 = Al.inline(new Function('return '+cur))();
-            patch('x1='+x1.toString());
-            return show(cur);
-          }
-          cur += 'x1';
-          show(cur);
-        },
+        click : button_x1,
         help:"x1 variable"
       },
       "x6" :  {
         color:'purple',
         label : "x<sub>6</sub>",
-        click : () => {
-          if (store) {
-            store = false;
-            x6 = Al.inline(new Function('return '+cur))();
-            patch('x6='+x6.toString());
-            return show(cur);
-          }
-          cur += 'x6';
-          show(cur);
-        },
+        click : button_x6,
         help:"x6 variable"
       },
       // 7,8,9,-,/,Exp,x2
       "_7" :  {
         label : "7",
-        click : () => {
-          cur += '7';
-          show(cur);
-        }
+        click : button_7
       },
       "_8" :  {
         label : "8",
-        click : () => {
-          cur += '8';
-          show(cur);
-        }
+        click : button_8
       },
       "_9" :  {
         label : "9",
-        click : () => {
-          cur += '9';
-          show(cur);
-        }
+        click : button_9
       },
       "-"  :  {
         color:'blue',
         label : "-",
-        click : () => {
-          cur += '-';
-          show(cur);
-        },
+        click : button_substract,
         help: "subtract"
       },
       "/"  :  {
         color:'blue',
         label : "/",
-        click : () => {
-          cur += '/';
-          show(cur);
-        },
+        click : button_divide,
         help: "divide"
       },
       "Exp":  {
         color:'blue',
         label : "Exp",
-        click : () => {
-          cur += '.Exp()';
-          show(cur);
-        },
+        click : button_exponentiate,
         help: "exponentiate"
       },
       "x2" :  {
         color:'purple',
         label : "x<sub>2</sub>",
-        click : () => {
-          if (store) {
-            store = false;
-            x2=Al.inline(new Function('return '+cur))();
-            patch('x2='+x2.toString());
-            return show(cur);
-          }
-          cur += 'x2';
-          show(cur);
-        },
+        click : button_x2,
         help: "x2 variable"
       },
       "x7" :  {
