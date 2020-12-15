@@ -23,74 +23,91 @@ function Galculator() {
     this.graph = document.getElementById('graph');
     this.hist  = document.getElementById('hist');
     this.title = document.getElementById('title');
+    this.calcBody = document.getElementById('calcBody');
 
-    this.graph.style.opacity = "0.3";
+    this.graph.style.opacity = '0.3';
 
     this.buttons = this.getButtons();
 
-        // Add all the buttons and install mouse and touch handlers. 
-        let j = 0;
-        let p;
-        for (let i in this.buttons) {
-            // Every 8 buttons, start a new group.
-            if (j%8==0) {
-                p = document.getElementById("calcBody").appendChild(
-                    Object.assign(document.createElement('div'), {
-                        className:'group'
-                    })
-                );
-            }
-            // Add the button to the current group.
-            let button = p.appendChild(
+    // Add all the buttons and install mouse and touch handlers. 
+    var j = 0;
+    var p;
+    for (var i in this.buttons) {
+        var buttonObject = this.buttons[i];
+        // Every 8 buttons, start a new group.
+        if (j%8 == 0) {
+            p = this.calcBody.appendChild(
                 Object.assign(document.createElement('div'), {
-                    className: "numButton noselect " + (this.buttons[i].color || ''),
-                    innerHTML: this.buttons[i].label
+                    className: 'group'
                 })
             );
-            // Link the handlers with closures
-            let self = this;
-            let buttonObject = this.buttons[i];
-            button.ontouchend = function(e) {
-                this.classList.remove('active');
-            }
-            button.ontouchstart = button.onmouseup = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                // Show touch response and vibrate on mobile.
-                if (window.TouchEvent && e instanceof TouchEvent) {
-                    this.classList.add('active');
-                }
-                navigator.vibrate && navigator.vibrate(50);
-                // Show help if needed. 
-                if (self.help) {
-                    self.help = false;
-                    self.histor = '';
-                    return self.print(buttonObject.help || 'no help for this button.');
-                }
-                // Call button click handler.  
-                buttonObject.click.bind(self)();
-            }
-            
-            this.buttons[i].el = button;
-
-            j++;
         }
-        
-        this.buttons.up.el.classList.add('disabled');
-        this.buttons.dwn.el.classList.add('disabled');
-
-        this.E();
-        this.e();
+        // Add the button to the current group.
+        var button = p.appendChild(
+            Object.assign(document.createElement('div'), {
+                className: "numButton noselect " + (buttonObject.color || ''),
+                innerHTML: buttonObject.label
+            })
+        );
+        buttonObject.el = button;
+        button.ontouchend = this.ontouchend(buttonObject);
+        button.ontouchstart = button.onmouseup = this.onmouseup(buttonObject);
+        j++;
+    }
     
-        // patch for cocoon.io
-        document.body.ontouchstart = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+    this.buttons.up.el.classList.add('disabled');
+    this.buttons.dwn.el.classList.add('disabled');
+
+    this.E();
+    this.e();
+
+    // patch for cocoon.io
+    document.body.ontouchstart = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    document.body.ontouchmove  = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}
+
+/**
+ * 
+ * @param {GalculatorButtonObject} buttonObject 
+ * @returns {(e:MouseEvent) => void}
+ */
+Galculator.prototype.onmouseup = function(buttonObject) {
+    var self = this;
+    return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Show touch response and vibrate on mobile.
+        if (window.TouchEvent && e instanceof TouchEvent) {
+            this.classList.add('active');
         }
-        document.body.ontouchmove  = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        navigator.vibrate && navigator.vibrate(50);
+        // Show help if needed. 
+        if (self.help) {
+            self.help = false;
+            self.histor = '';
+            return self.print(buttonObject.help || 'no help for this button.');
         }
+        // Call button click handler.  
+        buttonObject.click.bind(self)();
+    }
+}
+
+/**
+ * 
+ * @param {GalculatorButtonObject} buttonObject 
+ * @returns {(e:TouchEvent) => void}
+ */
+Galculator.prototype.ontouchend = function(buttonObject) {
+    var self = this;
+    return function(e) {
+        this.classList.remove('active');
+    }
 }
 
 /**
@@ -129,10 +146,13 @@ Galculator.prototype.E = function(x0, x1, x2, x3, x4, x5) {
     );
     this.e(x0,x1,x2,x3,x4,x5);
     for (var i=0; i<6; i++) {
-        this.buttons['E'+i].el.classList[arguments[i]?'remove':'add']('disabled');
+        this.buttons['E' + i].el.classList[arguments[i]?'remove':'add']('disabled');
     }
 }
 
+/**
+ * @returns {GalculatorButtonObject[]}
+ */
 Galculator.prototype.getButtons = function() {
     
     // Our calculator buttons.   
