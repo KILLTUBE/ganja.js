@@ -4,56 +4,122 @@ import ElementExtendsGenerator from "./ElementExtendsGenerator.js";
 
 /**
  * 
- * @param {Options} p 
+ * @param {Options} [p]
  * @param {*} [q]
  * @param {*} [r]
  */
 
 export default function Algebra(p,q,r) {
     // Resolve possible calling signatures so we know the numbers for p,q,r. Last argument can always be a function.
-      var fu=arguments[arguments.length-1],options=p; if (options instanceof Object) {
+    var fu=arguments[arguments.length-1],options=p;
+    if (options instanceof Object) {
         q = (p.q || (p.metric && p.metric.filter(x=>x==-1).length))| 0;
         r = (p.r || (p.metric && p.metric.filter(x=>x==0).length)) | 0;
         p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) || 0 : p.p || 0;
-      } else { options={}; p=p|0; r=r|0; q=q|0; };
+    } else {
+        options = {};
+        p = p | 0;
+        r = r | 0;
+        q = q | 0;
+    }
   
     // Support for multi-dual-algebras
-      if (options.dual || (p==0 && q==0 && r<0)) { r=options.dual=options.dual||-r; // Create a dual number algebra if r<0 (old) or options.dual set(new)
-        options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');  options.metric = [1,...Array(r)]; options.tot=r+1;
+    if (options.dual || (p==0 && q==0 && r<0)) {
+        r = options.dual = options.dual || -r; // Create a dual number algebra if r<0 (old) or options.dual set(new)
+        options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');
+        options.metric = [1,...Array(r)];
+        options.tot = r + 1;
         options.Cayley = [...Array(r+1)].map((a,i)=>[...Array(r+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'));
-      }
-      if (options.over) options.baseType = Array;
+    }
+
+    if (options.over) {
+        options.baseType = Array;
+    }
   
     // Calculate the total number of dimensions.
-      var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
+    var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
   
     // Unless specified, generate a full set of Clifford basis names. We generate them as an array of strings by starting
     // from numbers in binary representation and changing the set bits into their relative position.
     // Basis names are ordered first per grade, then lexically (not cyclic!).
     // For 10 or more dimensions all names will be double digits ! 1e01 instead of 1e1 ..
-      var basis=(options.basis&&(options.basis.length==2**tot||r<0||options.Cayley)&&options.basis)||[...Array(2**tot)]           // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
+    var basis=(options.basis&&(options.basis.length==2**tot||r<0||options.Cayley)&&options.basis)||[...Array(2**tot)]           // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
                 .map((x,xi)=>(((1<<30)+xi).toString(2)).slice(-tot||-1)                                                           // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
                 .replace(/./g,(a,ai)=>a=='0'?'':String.fromCharCode(66+ai-(r!=0))))                                               // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
                 .sort((a,b)=>(a.toString().length==b.toString().length)?(a>b?1:b>a?-1:0):a.toString().length-b.toString().length) // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
                 .map(x=>x&&'e'+(x.replace(/./g,x=>('0'+(x.charCodeAt(0)-65)).slice(tot>9?-2:-1) ))||'1')                          // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
   
     // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.
-      var low=basis.length==1?1:basis[1].match(/\d+/g)[0]*1,
-          grades=options.grades||(options.dual&&basis.map((x,i)=>i?1:0))||basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
-          grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
+    var low         = basis.length == 1 ? 1 : basis[1].match(/\d+/g)[0] * 1;
+    var grades      = options.grades || (options.dual && basis.map((x,i)=>i?1:0)) || basis.map(x=>tot>9?(x.length-1)/2:x.length-1);
+    var grade_start = grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
   
-    // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)
-    // This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
-      var simplify = (s,p,q,r)=>{
-            var sign=1,c,l,t=[],f=true,ss=s.match(tot>9?/(\d\d)/g:/(\d)/g);if (!ss) return s; s=ss; l=s.length;
-            while (f) { f=false;
+    /**
+     * String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)
+     * This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
+     * 
+     * Calling it with p,q,r==undefined is possible, if you don't need to have the sign,
+     * which amounts to the comparisons always false, aka the signature of basis vectors always +1,
+     * that is the index will never be >= p+r nor < r .. i.e. always positive
+     * 
+     * Calling it with p,q,r undefined defaults to all basis vectors having a +1 metric,
+     * and can be used to find if something is an even or odd permutation of the corresponding element in the basis.
+     * (E.g. if the basis contains 'e21' then simplify('e12') will return '-e21',
+     * if the basis contains instead 'e12' it will return 'e12')
+     * 
+     * @param {string} s_
+     * @param {number} [p]
+     * @param {number} [q]
+     * @param {number} [r]
+     * @returns {string}
+     */
+    var simplify = (s_, p, q, r) => {
+        var sign = 1;
+        var c;
+        var l;
+        var t = [];
+        var f = true;
+        var ss = s_.match(tot>9?/(\d\d)/g:/(\d)/g);
+        if (!ss) {
+            return s_;
+        }
+        var s = ss;
+        l = s.length;
+        while (f) {
+            f = false;
             // implement Ex*Ex = metric.
-              for (var i=0; i<l;) if (s[i]===s[i+1]) { if (options.metric) sign*=options.metric[s[i]-basis[1][1]]; else if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0;i+=2; f=true; } else t.push(s[i++]);
+            for (var i=0; i<l;)
+                if (s[i] === s[i+1]) {
+                    if (options.metric)
+                        sign *= options.metric[s[i] - basis[1][1]];
+                    else if ((s[i]-low) >= (p+r))
+                        sign *= -1;
+                    else if ((s[i]-low) < r)
+                        sign = 0;
+                    i += 2;
+                    f = true;
+                } else t.push(s[i++]);
             // implement Ex*Ey = -Ey*Ex while sorting basis vectors.
-              for (var i=0; i<t.length-1; i++) if (t[i]>t[i+1]) { c=t[i];t[i]=t[i+1];t[i+1]=c;sign*=-1;f=true; break;} if (f) { s=t;t=[];l=s.length; }
+            for (var i=0; i<t.length-1; i++)
+                if (t[i] > t[i+1]) {
+                    c      = t[i];
+                    t[i]   = t[i+1];
+                    t[i+1] = c;
+                    sign *= -1;
+                    f = true;
+                    break;
+                }
+            if (f) {
+                s = t;
+                t = [];
+                l = s.length;
             }
-            var ret=(sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1'); return (brm&&brm[ret])||(brm&&brm['-'+ret]&&'-'+brm['-'+ret])||ret;
-          },
+        }
+        var ret  = (sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1');
+        var ret2 = (brm && brm[ret]) || (brm && brm['-'+ret] && '-' + brm['-' + ret]) || ret;
+        console.log(`equals(simplify('${s_}', ${p}, ${q}, ${r}), '${ret2}');`);
+        return ret2;
+    },
           brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
   
     // As an alternative to the string fiddling, one can also bit-fiddle. In this case the basisvectors are represented by integers with 1 bit per generator set.
@@ -143,5 +209,8 @@ export default function Algebra(p,q,r) {
       Object.defineProperty(res, 'Dt', {configurable:true,get(){ if (_DT) return _DT; _DT = makeD(true); return _DT }});
   
     // If a function was passed in, translate, call and return its result. Else just return the Algebra.
-      if (fu instanceof Function) return res.inline(fu)(); else return res;
+      if (fu instanceof Function)
+        return res.inline(fu)();
+        else
+        return res;
     }

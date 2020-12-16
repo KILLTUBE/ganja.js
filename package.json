@@ -3,6 +3,7 @@
   "version": "1.0.170",
   "description": "Geometric Algebra for javascript with operator overloading and algebraic literals",
   "main": "ganja.js",
+  "type": "module",
   "directories": {
     "example": "examples",
     "codegen": "algebra generator for c++, c#, rust, python"

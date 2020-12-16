@@ -64,11 +64,11 @@ interface Element {
 type Input = Element | string | Array<any>;
 
 interface GalculatorButtonObject {
-    color: string;
+    color?: string;
     label: string;
     click: ()=>void;
-    help: string;
-    el: HTMLDivElement;
+    help?: string;
+    el?: HTMLDivElement;
 }
 
 // Fix TS
