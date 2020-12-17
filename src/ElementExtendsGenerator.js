@@ -42,33 +42,61 @@ export default function ElementExtendsGenerator(
 ) {
     // Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
     var res = class Element extends generator {
-
-        // constructor - create a floating point array with the correct number of coefficients.
         /**
-         * 
+         * constructor - create a floating point array with the correct number of coefficients.
          * @param {*} [a]
          */
-        constructor(a) { super(a); if (this.upgrade) this.upgrade(); return this; }
+        constructor(a) {
+            super(a);
+            if (this.upgrade) {
+                this.upgrade();
+            }
+        }
 
-        // Grade selection. (implemented by parent class).
         /**
-         * 
+         * Grade selection. (implemented by parent class).
          * @param {*} grade 
          * @param {*} res 
          */
-        Grade(grade, res) { res = res || new Element(); return super.Grade(grade, res); }
+        Grade(grade, res) {
+            res = res || new Element();
+            return super.Grade(grade, res);
+        }
 
-        // Right and Left divide - Defined on the elements, shortcuts to multiplying with the inverse.
-        Div(b, res) { return this.Mul(b.Inverse, res); }
-        LDiv(b, res) { return b.Inverse.Mul(this, res); }
+        /**
+         * Right divide - Defined on the elements, shortcuts to multiplying with the inverse.
+         * @param {*} b 
+         * @param {*} res 
+         */
+        Div(b, res) {
+            return this.Mul(b.Inverse, res);
+        }
+
+        /**
+         * Left divide - Defined on the elements, shortcuts to multiplying with the inverse.
+         * @param {*} b 
+         * @param {*} res 
+         */
+        LDiv(b, res) {
+            return b.Inverse.Mul(this, res);
+        }
 
         // Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
         Exp() {
-            if (options.dual) { var f = Math.exp(this.s); return this.map((x, i) => i ? x * f : f); }
+            if (options.dual) {
+                var f = Math.exp(this.s);
+                return this.map((x, i) => i ? x * f : f);
+            }
             if (r == 1 && tot <= 4 && Math.abs(this[0]) < 1E-9 && !options.over) {
-                var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u) < 1E-5) return this.Add(Element.Scalar(1));
+                var u = Math.sqrt(Math.abs(this.Dot(this).s));
+                if (Math.abs(u) < 1E-5) {
+                    return this.Add(Element.Scalar(1));
+                }
                 var v = this.Wedge(this).Scale(-1 / (2 * u));
-                var res2 = Element.Add(Element.Sub(Math.cos(u), v.Scale(Math.sin(u))), Element.Div(Element.Mul((Element.Add(Math.sin(u), v.Scale(Math.cos(u)))), this), (Element.Add(u, v))));
+                var res2 = Element.Add(
+                    Element.Sub(Math.cos(u), v.Scale(Math.sin(u))), Element.Div(Element.Mul((Element.Add(Math.sin(u), v.Scale(Math.cos(u)))), this),
+                    (Element.Add(u, v)))
+                );
                 return res2;
             }
             var res = Element.Scalar(1), y = 1, M = this.Scale(1), N = this.Scale(1); for (var x = 1; x < 15; x++) { res = res.Add(M.Scale(1 / y)); M = M.Mul(N); y = y * (x + 1); }; return res;
@@ -76,36 +104,72 @@ export default function ElementExtendsGenerator(
 
         // Log - only for up to 3D PGA for now
         Log() {
-            if (r != 1 || tot > 4 || options.over) return;
-            var b = this.Grade(2), bdb = Element.Dot(b, b);
-            if (Math.abs(bdb.s) <= 1E-5) return this.s < 0 ? b.Scale(-1) : b;
-            var s = Math.sqrt(-bdb), bwb = Element.Wedge(b, b);
-            if (Math.abs(bwb.e0123) <= 1E-5) return b.Scale(Math.atan2(s, this.s) / s);
+            if (r != 1 || tot > 4 || options.over) {
+                return;
+            }
+            var b = this.Grade(2);
+            var bdb = Element.Dot(b, b);
+            if (Math.abs(bdb.s) <= 1E-5) {
+                return this.s < 0 ? b.Scale(-1) : b;
+            }
+            var s = Math.sqrt(-bdb);
+            var bwb = Element.Wedge(b, b);
+            if (Math.abs(bwb.e0123) <= 1E-5) {
+                return b.Scale(Math.atan2(s, this.s) / s);
+            }
             var p = bwb.Scale(-1 / (2 * s));
-            return Element.Div(Element.Mul(Element.Mul((Element.Add(Math.atan2(s, this.s), Element.Div(p, this.s))), b), (Element.Sub(s, p))), (Element.Mul(s, s)));
+            return Element.Div(
+                Element.Mul(
+                    Element.Mul(
+                        (Element.Add(Math.atan2(s, this.s), Element.Div(p, this.s))),
+                        b
+                    ),
+                    (Element.Sub(s, p))
+                ),
+                (Element.Mul(s, s))
+            );
         }
 
         // Helper for efficient inverses. (custom involutions - negates grades in arguments).
-        Map() { var res = new Element(); return super.Map(res, ...arguments); }
+        Map() {
+            var res = new Element();
+            return super.Map(res, ...arguments);
+        }
 
         // Factories - Make it easy to generate vectors, bivectors, etc when using the functional API. None of the examples use this but
         // users that have used other GA libraries will expect these calls. The Coeff() is used internally when translating algebraic literals.
-        static Element() { return new Element([...arguments]); };
-        static Coeff() { return (new Element()).Coeff(...arguments); }
-        static Scalar(x) { return (new Element()).Coeff(0, x); }
-        static Vector() { return (new Element()).nVector(1, ...arguments); }
-        static Bivector() { return (new Element()).nVector(2, ...arguments); }
-        static Trivector() { return (new Element()).nVector(3, ...arguments); }
-        static nVector(n) { return (new Element()).nVector(...arguments); }
+        static Element() {
+            return new Element([...arguments]);
+        };
+        static Coeff() {
+            return (new Element()).Coeff(...arguments);
+        }
+        static Scalar(x) {
+            return (new Element()).Coeff(0, x);
+        }
+        static Vector() {
+            return (new Element()).nVector(1, ...arguments);
+        }
+        static Bivector() {
+            return (new Element()).nVector(2, ...arguments);
+        }
+        static Trivector() {
+            return (new Element()).nVector(3, ...arguments);
+        }
+        static nVector(n) {
+            return (new Element()).nVector(...arguments);
+        }
 
         // Static operators. The parser will always translate operators to these static calls so that scalars, vectors, matrices and other non-multivectors can also be handled.
         // The static operators typically handle functions and matrices, calling through to element methods for multivectors. They are intended to be flexible and allow as many
         // types of arguments as possible. If performance is a consideration, one should use the generated element methods instead. (which only accept multivector arguments)
         static toEl(x) {
-            if (x instanceof Function)
+            if (x instanceof Function) {
                 x = x();
-            if (!(x instanceof Element))
+            }
+            if (!(x instanceof Element)) {
                 x = Element.Scalar(x);
+            }
             return x;
         }
 
@@ -750,8 +814,10 @@ export default function ElementExtendsGenerator(
         static sum(B) {
             var A = Element;
             // Get the multiplication tabe and basis.
-            var T1 = A.describe().mulTable, T2 = B.describe().mulTable;
-            var B1 = A.describe().basis, B2 = B.describe().basis;
+            var T1 = A.describe().mulTable;
+            var T2 = B.describe().mulTable;
+            var B1 = A.describe().basis;
+            var B2 = B.describe().basis;
             // Get the maximum index of T1, minimum of T2 and rename T2 if needed.
             var max_T1 = B1.filter(x => x.match(/e/)).map(x => x.match(/\d/g)).flat().map(x => x | 0).sort((a, b) => b - a)[0];
             var max_T2 = B2.filter(x => x.match(/e/)).map(x => x.match(/\d/g)).flat().map(x => x | 0).sort((a, b) => b - a)[0];
@@ -761,14 +827,22 @@ export default function ElementExtendsGenerator(
             B2 = B2.map((y, i) => i == 0 ? y.replace("1", "e" + (1 + max_T2 + max_T1)) : y.replace(/(\d)/g, (x) => (x | 0) + max_T1));
             // Build the new basis and multable..
             var basis = [...B1, ...B2];
-            var Cayley = T1.map((x, i) => [...x, ...T2[0].map(x => "0")]).concat(T2.map((x, i) => [...T1[0].map(x => "0"), ...x]))
+            var Cayley = T1.map(
+                (x, i) => [...x, ...T2[0].map(x => "0")]
+            ).concat(
+                T2.map(
+                    (x, i) => [...T1[0].map(x => "0"), ...x]
+                )
+            )
             // Build the new algebra.
             var grades = [...B1.map(x => x == "1" ? 0 : x.length - 1), ...B2.map((x, i) => i ? x.length - 1 : 0)];
             var a = Algebra({ basis, Cayley, grades, tot: Math.log2(B1.length) + Math.log2(B2.length) })
             // And patch up ..
             a.Scalar = function (x) {
                 var res = new a();
-                for (var i = 0; i < res.length; i++) res[i] = basis[i] == Cayley[i][i] ? x : 0;
+                for (var i = 0; i < res.length; i++) {
+                    res[i] = basis[i] == Cayley[i][i] ? x : 0;
+                }
                 return res;
             }
             return a;
