@@ -2,6 +2,15 @@ interface Algebra {
 
 }
 
+declare class MultiVector {
+    constructor(a: any);
+    Grade(grade: any, res: any): any;
+}
+
+interface Element {
+
+}
+
 interface Options {
     scale?: number;
     conformal?: boolean;
@@ -57,12 +66,8 @@ interface Options {
     fontSize: number;
 }
 
-interface Element {
-
-}
-
-type Input = Element | string | Array<any>;
-
+type ElementInput  = Element             | Array<any> | string | number;
+type ElementOutput = Element | Element[] | Array<any> | string | number;
 interface GalculatorButtonObject {
     color?: string;
     label: string;

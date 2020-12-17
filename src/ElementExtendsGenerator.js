@@ -6,7 +6,7 @@ import Element_inline from "./Element_inline.js";
 
 /**
  * 
- * @param {*} generator 
+ * @param {MultiVector} generator 
  * @param {Options} options 
  * @param {*} tot 
  * @param {*} drm 
@@ -56,7 +56,7 @@ export default function ElementExtendsGenerator(
         /**
          * Grade selection. (implemented by parent class).
          * @param {*} grade 
-         * @param {*} res 
+         * @param {Element} res
          */
         Grade(grade, res) {
             res = res || new Element();
@@ -65,8 +65,8 @@ export default function ElementExtendsGenerator(
 
         /**
          * Right divide - Defined on the elements, shortcuts to multiplying with the inverse.
-         * @param {*} b 
-         * @param {*} res 
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         Div(b, res) {
             return this.Mul(b.Inverse, res);
@@ -74,14 +74,16 @@ export default function ElementExtendsGenerator(
 
         /**
          * Left divide - Defined on the elements, shortcuts to multiplying with the inverse.
-         * @param {*} b 
-         * @param {*} res 
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         LDiv(b, res) {
             return b.Inverse.Mul(this, res);
         }
 
-        // Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
+        /**
+         * Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
+         */
         Exp() {
             if (options.dual) {
                 var f = Math.exp(this.s);
@@ -99,10 +101,21 @@ export default function ElementExtendsGenerator(
                 );
                 return res2;
             }
-            var res = Element.Scalar(1), y = 1, M = this.Scale(1), N = this.Scale(1); for (var x = 1; x < 15; x++) { res = res.Add(M.Scale(1 / y)); M = M.Mul(N); y = y * (x + 1); }; return res;
+            var res = Element.Scalar(1);
+            var y = 1;
+            var M = this.Scale(1);
+            var N = this.Scale(1);
+            for (var x = 1; x < 15; x++) {
+                res = res.Add(M.Scale(1 / y));
+                M = M.Mul(N);
+                y = y * (x + 1);
+            }
+            return res;
         }
 
-        // Log - only for up to 3D PGA for now
+        /**
+         * Log - only for up to 3D PGA for now
+         */
         Log() {
             if (r != 1 || tot > 4 || options.over) {
                 return;
@@ -130,7 +143,9 @@ export default function ElementExtendsGenerator(
             );
         }
 
-        // Helper for efficient inverses. (custom involutions - negates grades in arguments).
+        /**
+         * Helper for efficient inverses. (custom involutions - negates grades in arguments).
+         */
         Map() {
             var res = new Element();
             return super.Map(res, ...arguments);
@@ -144,18 +159,35 @@ export default function ElementExtendsGenerator(
         static Coeff() {
             return (new Element()).Coeff(...arguments);
         }
+        /**
+         * 
+         * @param {number} x 
+         * @returns {Element}
+         */
         static Scalar(x) {
             return (new Element()).Coeff(0, x);
         }
+        /**
+         * @returns {Element}
+         */
         static Vector() {
             return (new Element()).nVector(1, ...arguments);
         }
+        /**
+         * @returns {Element}
+         */
         static Bivector() {
             return (new Element()).nVector(2, ...arguments);
         }
+        /**
+         * @returns {Element}
+         */
         static Trivector() {
             return (new Element()).nVector(3, ...arguments);
         }
+        /**
+         * @returns {Element}
+         */
         static nVector(n) {
             return (new Element()).nVector(...arguments);
         }
@@ -173,12 +205,11 @@ export default function ElementExtendsGenerator(
             return x;
         }
 
-        // Addition and subtraction. Subtraction with only one parameter is negation.
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * Addition and subtraction. Subtraction with only one parameter is negation.
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Add(a, b, res) {
             // Resolve expressions passed in.
@@ -215,9 +246,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Sub(a, b, res) {
             // Resolve expressions passed in.
@@ -252,12 +283,11 @@ export default function ElementExtendsGenerator(
             return a.Sub(b, res);
         }
 
-        // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Mul(a, b, res) {
             // Resolve expressions
@@ -323,12 +353,11 @@ export default function ElementExtendsGenerator(
             return a.Mul(b, res);
         }
 
-        // The inner product. (default is left contraction).
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * The inner product. (default is left contraction).
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static LDot(a, b, res) {
             // Expressions
@@ -357,12 +386,11 @@ export default function ElementExtendsGenerator(
             return a.LDot(b, res);
         }
 
-        // The symmetric inner product. (default is left contraction).
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * The symmetric inner product. (default is left contraction).
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Dot(a, b, res) {
             // Expressions
@@ -384,12 +412,11 @@ export default function ElementExtendsGenerator(
             return a.Dot(b, res);
         }
 
-        // The outer product. (Grassman product - no use of metric)
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * The outer product. (Grassman product - no use of metric)
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Wedge(a, b, res) {
             // Expressions
@@ -415,12 +442,11 @@ export default function ElementExtendsGenerator(
             return a.Wedge(b, res);
         }
 
-        // The regressive product. (Dual of the outer product of the duals).
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * The regressive product. (Dual of the outer product of the duals).
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Vee(a, b, res) {
             // Expressions
@@ -442,17 +468,17 @@ export default function ElementExtendsGenerator(
             return a.Vee(b, res);
         }
 
-        // The sandwich product. Provided for convenience (>>> operator)
         /**
-         * 
-         * @param {Input} a 
-         * @param {Input} b 
-         * @returns {Element | Element[] | Array<any>}
+         * The sandwich product. Provided for convenience (>>> operator)
+         * @param {ElementInput} a
+         * @param {ElementInput} b 
+         * @returns {ElementOutput}
          */
         static sw(a, b) {
             // Skip strings/colors
-            if (typeof b == "string" || typeof b =="number")
+            if (typeof b == "string" || typeof b == "number") {
                 return b;
+            }
             // Expressions
             while (a.call) {
                 a = a();
@@ -473,12 +499,11 @@ export default function ElementExtendsGenerator(
             return a.Mul(b).Mul(a.Reverse);
         }
 
-        // Division - scalars or cal through to element method.
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * Division - scalars or cal through to element method.
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Div(a, b, res) {
             // Expressions
@@ -545,12 +570,11 @@ export default function ElementExtendsGenerator(
             return a.Div(b, res);
         }
 
-        // Pow - needs obvious extensions for natural powers. (exponentiation by squaring)
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
-         * @param {*} res 
+         * Pow - needs obvious extensions for natural powers. (exponentiation by squaring)
+         * @param {ElementInput} a
+         * @param {ElementInput} b
+         * @param {Element} res
          */
         static Pow(a, b, res) {
             // Expressions
@@ -584,10 +608,10 @@ export default function ElementExtendsGenerator(
             return a.Pow(b);
         }
 
-        // Handles scalars and calls through to element method.
         /**
-         * 
-         * @param {*} a 
+         * Handles scalars and calls through to element method.
+         * @param {ElementInput} a
+         * @returns {number}
          */
         static exp(a) {
             // Expressions.
@@ -605,7 +629,8 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Dual(a) {
             return Element.toEl(a).Dual;
@@ -613,7 +638,8 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Involute(a) {
             return Element.toEl(a).Involute;
@@ -621,7 +647,8 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Reverse(a) {
             return Element.toEl(a).Reverse;
@@ -629,21 +656,25 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Conjugate(a) {
             if (a.Conjugate) {
                 return a.Conjugate;
             }
             if (a instanceof Array) {
-                return a[0].map((c, ci) => a.map((r, ri) => Element.Conjugate(a[ri][ci])));
+                return a[0].map(
+                    (c, ci) => a.map((r, ri) => Element.Conjugate(a[ri][ci]))
+                );
             }
             return Element.toEl(a).Conjugate;
         }
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Normalize(a) {
             return Element.toEl(a).Normalized;
@@ -651,17 +682,18 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
+         * @param {ElementInput} a
+         * @returns {Element}
          */
         static Length(a) {
             return Element.toEl(a).Length
         }
 
-        // Comparison operators always use length. Handle expressions, then js or length comparison
         /**
-         * 
-         * @param {*} a 
-         * @param {*} b 
+         * Comparison operators always use length. Handle expressions, then js or length comparison
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static eq(a, b) {
             if (!(a instanceof Element) || !(b instanceof Element)) {
@@ -683,8 +715,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static neq(a, b) {
             if (!(a instanceof Element) || !(b instanceof Element)) {
@@ -706,8 +739,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static lt(a, b) {
             while (a.call) {
@@ -721,8 +755,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static gt(a, b) {
             while (a.call) {
@@ -736,8 +771,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static lte(a, b) {
             while (a.call) {
@@ -751,8 +787,9 @@ export default function ElementExtendsGenerator(
 
         /**
          * 
-         * @param {*} a 
-         * @param {*} b 
+         * @param {Element | number} a 
+         * @param {Element | number} b 
+         * @returns {boolean}
          */
         static gte(a, b) {
             while (a.call) {
@@ -767,7 +804,7 @@ export default function ElementExtendsGenerator(
         // Debug output and printing multivectors.
         /**
          * 
-         * @param {*} x 
+         * @param {boolean} [x]
          */
         static describe(x) {
             if (x === true) {
@@ -809,7 +846,8 @@ export default function ElementExtendsGenerator(
         // Direct sum of algebras - experimental
         /**
          * 
-         * @param {*} B 
+         * @param {ElementInput} B
+         * @returns {Element}
          */
         static sum(B) {
             var A = Element;
@@ -836,7 +874,12 @@ export default function ElementExtendsGenerator(
             )
             // Build the new algebra.
             var grades = [...B1.map(x => x == "1" ? 0 : x.length - 1), ...B2.map((x, i) => i ? x.length - 1 : 0)];
-            var a = Algebra({ basis, Cayley, grades, tot: Math.log2(B1.length) + Math.log2(B2.length) })
+            var a = Algebra({
+                basis,
+                Cayley,
+                grades,
+                tot: Math.log2(B1.length) + Math.log2(B2.length)
+            });
             // And patch up ..
             a.Scalar = function (x) {
                 var res = new a();
@@ -848,11 +891,9 @@ export default function ElementExtendsGenerator(
             return a;
         }
 
-        // The inline function is a js to js translator that adds operator overloading and algebraic literals.
-        // It can be called with a function, a string, or used as a template function.
-
         /**
-         * 
+         * The inline function is a js to js translator that adds operator overloading and algebraic literals.
+         * It can be called with a function, a string, or used as a template function.
          * @param {*} intxt 
          */
         static inline(intxt) {
@@ -884,9 +925,8 @@ export default function ElementExtendsGenerator(
             );
         }
 
-        // webGL Graphing function. (for parametric defined objects)
         /**
-         * 
+         * webGL Graphing function. (for parametric defined objects)
          * @param {*} f 
          * @param {Options} options
          */
