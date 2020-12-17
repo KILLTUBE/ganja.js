@@ -11,7 +11,9 @@ import ElementExtendsGenerator from "./ElementExtendsGenerator.js";
 
 export default function Algebra(p,q,r) {
     // Resolve possible calling signatures so we know the numbers for p,q,r. Last argument can always be a function.
-    var fu=arguments[arguments.length-1],options=p;
+    var fu = arguments[arguments.length-1];
+    var options = p;
+
     if (options instanceof Object) {
         q = (p.q || (p.metric && p.metric.filter(x=>x==-1).length))| 0;
         r = (p.r || (p.metric && p.metric.filter(x=>x==0).length)) | 0;
@@ -117,22 +119,53 @@ export default function Algebra(p,q,r) {
         }
         var ret  = (sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1');
         var ret2 = (brm && brm[ret]) || (brm && brm['-'+ret] && '-' + brm['-' + ret]) || ret;
-        console.log(`equals(simplify('${s_}', ${p}, ${q}, ${r}), '${ret2}');`);
+        //console.log(`equals(simplify('${s_}', ${p}, ${q}, ${r}), '${ret2}');`);
         return ret2;
-    },
-          brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
+    };
+    // Todo: export as function and do something about unused `x`
+    var brm = (
+        x => {
+            var ret = {};
+            for (var i in basis) {
+                ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i];
+            }
+            return ret;
+        }
+    )(basis);
   
     // As an alternative to the string fiddling, one can also bit-fiddle. In this case the basisvectors are represented by integers with 1 bit per generator set.
-      var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q+r),t=0,ab=A&B,res=A^B; if (ab&((1<<r)-1)) return [0,0]; while (n--) t^=(A=A>>1); t&=B; t^=ab>>(p+r); t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
-          bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); var c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c };
+    var simplify_bits = (A,B,p2) => {
+        var n = p2 || (p+q+r);
+        var t = 0;
+        var ab = A&B;
+        var res = A^B;
+        if (ab & ((1<<r)-1)) {
+            return [0, 0];
+        }
+        while (n--) {
+            t ^= (A=A>>1);
+        }
+        t &= B;
+        t ^= ab >> (p+r);
+        t ^= t >> 16;
+        t ^= t >>  8;
+        t ^= t >>  4;
+        return [1-2*(27030>>(t&15)&1), res];
+    };
+    var bc = (v) => {
+        v = v-((v>>1)& 0x55555555);
+        v = (v&0x33333333) + ((v>>2)&0x33333333);
+        var c = ((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24;
+        return c;
+    };
   
     var basisg;
     if (!options.graded && tot <= 6 || options.graded===false || options.Cayley) {
+        // Graded generator for high-dimensional algebras.
         var {generator, drm, mulTable, metric, gp} = MultiVectorExtendsFloat32Array(basis, options, simplify, grades, grade_start, tot, p, q, r);
-        /// Graded generator for high-dimensional algebras.
     } else {
+        // This generator is UNDER DEVELOPMENT - I'm publishing it so I can test on observable.
         var {generator, counts, basisg} = MultiVectorExtendsArray(basis, simplify_bits, grades, grade_start, tot, low, bc);
-     // This generator is UNDER DEVELOPMENT - I'm publishing it so I can test on observable.
     }
   
     var res = ElementExtendsGenerator(
@@ -153,64 +186,201 @@ export default function Algebra(p,q,r) {
         basisg
     );
   
-      if (options.dual) {
-        Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});
-      } else {
-      // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
-      // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
-        Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
-          return (tot==0)?new this.constructor.Scalar([1/this[0]]):
-                 (tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):
-                 (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
-                 (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0])):
-                 (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0])):
+    if (options.dual) {
+        Object.defineProperty(
+            res.prototype,
+            'Inverse', {
+                configurable: true,
+                get() {
+                    var s = 1 / this.s ** 2;
+                    return this.map(
+                        (x,i) => i ? -x*s : 1/x
+                    );
+                }
+            }
+        );
+    } else {
+        // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
+        // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
+        Object.defineProperty(
+            res.prototype,
+            'Inverse', {
+                configurable: true,
+                get() {
+                    return (tot==0)?new this.constructor.Scalar([1/this[0]]):
+                    (tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):
+                    (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
+                    (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0])):
+                    (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0])):
                           this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0]));
-        }});
-      }
+                }
+            }
+        );
+    }
   
-      if (options.over) {
-       // experimental. do not use.
+    if (options.over) {
+        // experimental. do not use.
         res.over = options.over;
-        ["Mul","Add","Sub","Scale","Dot","Wedge","LDot","Vee"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
-        res.prototype.Coeff   = function() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=(arguments[i+1] instanceof options.over)?arguments[i+1]:options.over.Scalar(arguments[i+1]); return this; }
-        res.prototype.upgrade = function () { for (var i=0; i<this.length; i++) this[i] = options.over.Scalar(0); }
-        Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]); return res; }});
-        Object.defineProperty(res.prototype, 'Reverse',   {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,1,-1,-1][grades[i]%4]); return res; }});
-        Object.defineProperty(res.prototype, 'Involute',  {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,1,-1][grades[i]%4]); return res; }});
-        Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
-          return (tot==0)?new this.constructor.Scalar([this[0].Inverse]):
-                 (tot==1)?this.Involute.Mul(this.constructor.Scalar(this.Mul(this.Involute)[0].Inverse)):
-                 (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(this.Mul(this.Conjugate)[0].Inverse)):
-                 (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0].Inverse)):
-                 (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0].Inverse)):
+        ["Mul","Add","Sub","Scale","Dot","Wedge","LDot","Vee"].forEach(
+            x => res.prototype[x] = options.over.inline(res.prototype[x])
+        );
+        res.prototype.Coeff   = function() {
+            for (var i=0,l=arguments.length; i<l; i+=2)
+                this[arguments[i]]=(arguments[i+1] instanceof options.over)?arguments[i+1]:options.over.Scalar(arguments[i+1]);
+            return this;
+        }
+        res.prototype.upgrade = function () {
+            for (var i=0; i<this.length; i++)
+                this[i] = options.over.Scalar(0);
+        }
+        Object.defineProperty(
+            res.prototype,
+            'Conjugate', {
+                configurable: true,
+                get() {
+                    var res = new this.constructor();
+                    for (var i=0; i<this.length; i++)
+                        res[i] = this[i].slice().Scale([1,-1,-1,1][grades[i]%4]);
+                    return res;
+                }
+            }
+        );
+        Object.defineProperty(
+            res.prototype,
+            'Reverse', {
+                configurable: true,
+                get() {
+                    var res = new this.constructor();
+                    for (var i=0; i<this.length; i++)
+                        res[i]= this[i].slice().Scale([1,1,-1,-1][grades[i]%4]);
+                    return res;
+                }
+            }
+        );
+        Object.defineProperty(
+            res.prototype,
+            'Involute', {
+                configurable: true,
+                get() {
+                    var res = new this.constructor();
+                    for (var i=0; i<this.length; i++)
+                        res[i] = this[i].slice().Scale([1,-1,1,-1][grades[i]%4]);
+                    return res;
+                }
+            }
+        );
+        Object.defineProperty(
+            res.prototype,
+            'Inverse', {
+                configurable: true,
+                get() {
+                    return (tot==0)?new this.constructor.Scalar([this[0].Inverse]):
+                    (tot==1)?this.Involute.Mul(this.constructor.Scalar(this.Mul(this.Involute)[0].Inverse)):
+                    (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(this.Mul(this.Conjugate)[0].Inverse)):
+                    (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0].Inverse)):
+                    (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0].Inverse)):
                           this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0].Inverse));
-        }});
-        res.prototype.toString = function() { return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + '); }
-      }
+                }
+            }
+        );
+        res.prototype.toString = function() {
+            return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + ');
+        }
+    }
   
     // Experimental differential operator.
-      var _D, _DT, _DA, totd = basis.length;
-      function makeD(transpose=false){
-        _DA = _DA || Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:totd})}); // same algebra, but over dual numbers.
-        return (func)=>{
-          var dfunc = _DA.inline(func);                                                                       // convert input function to dual algebra
-          return (val,...args)=>{                                                                             // return a new function (the derivative w.r.t 1st param)
-            if (!(val instanceof res)) val = res.Scalar(val);                                                 // allow to be called with scalars.
-            args = args.map(x=>{ var r = _DA.Scalar(0); for (var i=0; i<totd; i++) r[i][0]=x[i]; return r;}); // upcast args.
-            for (var dval=_DA.Scalar(0),i=0; i<totd; i++) { dval[i][0] = val[i]; dval[i][1+i] = 1; };         // fill in coefficients and dual components
-            var rval = dfunc(dval,...args); var r = [...Array(totd)].map(x=>val.slice());                     // call the function in the dual algebra.
-            if (transpose) for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[i][j] = rval[i][j+1]; }  // downcast transpose from dual algebra to Jacobian vector.
-            else for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[j][i] = rval[i][j+1]; }            // downcast from dual algebra to Jacobian vector.
-            return r.length<=2?r[0]:r;                                                                        // return derivative or jacobian.
-          }
+    var _D;
+    var _DT;
+    var _DA;
+    var totd = basis.length;
+    function makeD(transpose=false) {
+        // same algebra, but over dual numbers.
+        _DA = _DA || Algebra({
+            p: p,
+            q: q,
+            r: r,
+            basis: options.basis,
+            even: options.even,
+            over: Algebra({dual:totd})
+        });
+        return (func) => {
+            // convert input function to dual algebra
+            var dfunc = _DA.inline(func);
+            // return a new function (the derivative w.r.t 1st param)
+            return (val,...args) => {
+                // allow to be called with scalars.
+                if (!(val instanceof res)) {
+                    val = res.Scalar(val);
+                }
+                // upcast args.
+                args = args.map(
+                    x => {
+                        var r = _DA.Scalar(0);
+                        for (var i=0; i<totd; i++) {
+                            r[i][0]=x[i];
+                        }
+                        return r;
+                    }
+                );
+                // fill in coefficients and dual components
+                for (var dval=_DA.Scalar(0),i=0; i<totd; i++) {
+                    dval[i][0]   = val[i];
+                    dval[i][1+i] = 1;
+                };
+                // call the function in the dual algebra.
+                var rval = dfunc(dval,...args);
+                var r = [...Array(totd)].map(x=>val.slice());
+                // downcast transpose from dual algebra to Jacobian vector.
+                if (transpose) {
+                    for (var i=0; i<totd; i++) {
+                        for (var j=0; j<totd; j++) {
+                            r[i][j] = rval[i][j+1];
+                        }
+                    }
+                // downcast from dual algebra to Jacobian vector.
+                } else {
+                    for (var i=0; i<totd; i++) {
+                        for (var j=0; j<totd; j++) {
+                            r[j][i] = rval[i][j+1];
+                        }
+                    }
+                }
+                // return derivative or jacobian.
+                return r.length<=2?r[0]:r;
+            }
         }
-      }
-      Object.defineProperty(res, 'D',  {configurable:true,get(){ if (_D) return _D; _D = makeD(false); return _D }});
-      Object.defineProperty(res, 'Dt', {configurable:true,get(){ if (_DT) return _DT; _DT = makeD(true); return _DT }});
+    }
+    Object.defineProperty(
+        res,
+        'D', {
+            configurable: true,
+            get() {
+                if (_D) {
+                    return _D;
+                }
+                _D = makeD(false);
+                return _D;
+            }
+        }
+    );
+    Object.defineProperty(
+        res,
+        'Dt', {
+            configurable: true,
+            get() {
+                if (_DT) {
+                    return _DT;
+                }
+                _DT = makeD(true);
+                return _DT;
+            }
+        }
+    );
   
     // If a function was passed in, translate, call and return its result. Else just return the Algebra.
-      if (fu instanceof Function)
+    if (fu instanceof Function) {
         return res.inline(fu)();
-        else
+    } else {
         return res;
     }
+}
