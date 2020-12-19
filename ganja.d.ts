@@ -82,3 +82,6 @@ declare function parseFloat(x: number | string): number;
 interface Number {
     call: any;
 }
+
+//import * as D3 from "d3";
+//declare function d3(string: any): D3;
