@@ -49,8 +49,27 @@ export default function Element_inline(
     while (txt.length) {
         for (t in tokens) {
             if (resi = txt.match(tokens[t])) {
-                tok.push([t | 0, resi[0]]);
-                txt = txt.slice(resi[0].length);
+                var len = resi[0].length;
+                if (len == 0) {
+                    var charCodes = [];
+                    for (var i=0; i<txt.length; i++) {
+                        var charCode = txt.charCodeAt(i);
+                        if (charCode > 255 || txt.match(/^[a-zA-Z0-9_]/g)) {
+                            charCodes.push(charCode);
+                        } else {
+                            break;
+                        }
+                    }
+                    var codeString = String.fromCharCode(...charCodes);
+                    //console.log("codeString", codeString);
+                    tok.push([t | 0, codeString]);
+                    txt = txt.slice(charCodes.length);
+                    //console.log("tok", tok)
+                    //console.log("txt", txt)
+                } else {
+                    tok.push([t | 0, resi[0]]);
+                    txt = txt.slice(resi[0].length);
+                }
                 break;
             } // tokenise
         }
