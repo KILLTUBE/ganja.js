@@ -915,8 +915,11 @@ export default function ElementExtendsGenerator(
          */
         static graph(f, options) {
             // console.log("graph");
-            //return Element_graph.bind(this)(
-            return Element_graph_arrows.bind(this)(
+            var func = Element_graph;
+            if (options && options.arrows) {
+                func = Element_graph_arrows;
+            }
+            return func.bind(this)(
                 f,
                 options,
                 Element,
