@@ -7,6 +7,9 @@
 //   graph(function=>array) => same as above, for animation scenario's this function is called each frame.
 // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
 
+import { graph_f1 } from "./Element_graph_f1.js";
+import { graph_f2 } from "./Element_graph_f2.js";
+
 /**
  * 
  * @param {*} f 
@@ -185,41 +188,24 @@ export default function Element_graph(
         return res;
     }
     // 1d and 2d functions are rendered on a canvas.
-    console.log("cvs", cvs);
-    console.log("ww", ww);
-    console.log("hh", hh);
-    cvs = cvs || document.createElement('canvas');
-    if (ww) {
-        cvs.width = ww;
+    cvs = cvs || document.createElement('canvas');  
+    if (!ww) {
+        ww = window.innerWidth;
     }
-    if (hh) {
-        cvs.height = hh;
+    if (!hh) {
+        hh = window.innerHeight;
     }
+    cvs.width = ww;
+    cvs.height = hh;
     var w = cvs.width;
     var h = cvs.height;
     var context = cvs.getContext('2d');
     var data = context.getImageData(0, 0, w, h);
     
     if (f.length == 2) {
-        // two parameter functions .. evaluate for both and set resulting color.
-        for (var px = 0; px < w; px++) {
-            for (var py = 0; py < h; py++) {
-                var res = f(px / w * 2 - 1, py / h * 2 - 1);
-                res = res.buffer ? [].slice.call(res) : res.slice ? res : [res, res, res];
-                data.data.set(res.map(x => x * 255).concat([255]), py * w * 4 + px * 4);
-            }
-        }
+        graph_f2(w, h, data, cvs, f);
     } else if (f.length == 1) {
-        // one parameter function.. go over x range, use result as y.
-        for (var px = 0; px < w; px++) {
-            var res = f(px / w * 2 - 1);
-            res = Math.round((res / 2 + 0.5) * h);
-            if (res > 0 && res < h - 1)
-                data.data.set(
-                    [0, 0, 0, 255],
-                    res * w * 4 + px * 4
-                );
-        }
+        graph_f1(w, h, data, cvs, f);
     }
     return context.putImageData(data, 0, 0), cvs;
 }

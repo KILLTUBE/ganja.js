@@ -1,5 +1,8 @@
 // https://github.com/enkimute/ganja.js/pull/73
 
+import { graph_f1 } from "./Element_graph_f1.js";
+import { graph_f2 } from "./Element_graph_f2.js";
+
 // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
 // It handles animation and interactivity.
 //   graph(function(x))     => function of 1 parameter will be called with that parameter from -1 to 1 and graphed on a canvas. Returned values should also be in the [-1 1] range
@@ -608,22 +611,10 @@ export default function Element_graph_arrows(
     var data = context.getImageData(0, 0, w, h);
     // two parameter functions .. evaluate for both and set resulting color.
     if (f.length == 2) {
-        for (var px = 0; px < w; px++) {
-            for (var py = 0; py < h; py++) {
-                var res = f(px / w * 2 - 1, py / h * 2 - 1);
-                res = res.buffer ? [].slice.call(res) : res.slice ? res : [res, res, res];
-                data.data.set(res.map(x => x * 255).concat([255]), py * w * 4 + px * 4);
-            }
-        }
+        graph_f2(w, h, data, cvs, f);
     // one parameter function.. go over x range, use result as y.
     } else if (f.length == 1) {
-        for (var px = 0; px < w; px++) {
-            var res = f(px / w * 2 - 1);
-            res = Math.round((res / 2 + 0.5) * h);
-            if (res > 0 && res < h - 1) {
-                data.data.set([0, 0, 0, 255], res * w * 4 + px * 4);
-            }
-        }
+        graph_f1(w, h, data, cvs, f);
     }
     return context.putImageData(data, 0, 0), cvs;
 }
