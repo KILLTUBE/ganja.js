@@ -65,6 +65,7 @@ interface Options {
     over?: Algebra;
     fontSize: number;
     arrows: boolean; // graph with arrows or not (looks a bit convoluted in some examples)
+    format?: "table" | "canvas";
 }
 
 type ElementInput  = Element             | Array<any> | string | number;

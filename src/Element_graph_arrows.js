@@ -611,10 +611,10 @@ export default function Element_graph_arrows(
     var data = context.getImageData(0, 0, w, h);
     // two parameter functions .. evaluate for both and set resulting color.
     if (f.length == 2) {
-        graph_f2(w, h, data, cvs, f);
+        graph_f2(w, h, data, cvs, f, context);
     // one parameter function.. go over x range, use result as y.
     } else if (f.length == 1) {
-        graph_f1(w, h, data, cvs, f);
+        graph_f1(w, h, data, cvs, f, context);
     }
     return context.putImageData(data, 0, 0), cvs;
 }
