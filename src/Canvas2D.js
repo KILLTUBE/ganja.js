@@ -8,16 +8,41 @@ export default class Canvas2D {
         this.context = canvas.getContext('2d');
     }
 
+    /*
+        Formerly:
 
-    drawGrid() {
-        var context = this.context;
         var w = this.canvas.width;
         var h = this.canvas.height;
-
         // Convert real component to canvas left/right
         var X = (real) => (real + 1) * w /  2;
         // Convert imag component to canvas top/bottom
         var Y = (imag) => (-imag + 1) * h / 2; // - to flip "top"
+    */
+
+    /**
+     * 
+     * @param {number} x
+     */
+    X(x) {
+        var w = this.canvas.width;
+        return (x + 1) * w /  2;
+    }
+
+    /**
+     * 
+     * @param {number} y 
+     */
+    Y(y) {
+        var h = this.canvas.height;
+        y *= -1; // flip "top"
+        return (y + 1) * h / 2;
+    }
+
+    drawGrid() {
+        var context = this.context;
+
+        var X = this.X.bind(this);
+        var Y = this.Y.bind(this);
 
         var real_from = -10;
         var real_to = 10;
