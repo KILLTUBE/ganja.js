@@ -17,8 +17,8 @@ interface Options {
     even?: boolean;
     dual?: number;
     camera?: Element;
-    width?: number | string;
-    height?: number | string;
+    width?: number;
+    height?: number;
     canvas?: HTMLCanvasElement;
     ni?: Element;
     no?: Element;

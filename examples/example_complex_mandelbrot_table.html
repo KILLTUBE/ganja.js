@@ -16,7 +16,9 @@ Algebra(0,1,()=>{
     return (n / 30);
   };
   var options = {
-    format: "table"
+    format: "table",
+    width: 9,
+    height: 9
   };
   var dom = this.graph(func, options);
   document.body.appendChild(dom);

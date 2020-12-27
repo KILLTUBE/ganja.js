@@ -1,16 +1,20 @@
 /**
  * 
- * @param {*} width
- * @param {*} height
+ * @param {Options} options
+ * @param {number} width
+ * @param {number} height
  * @param {(x: number) => number} f
  * @returns {HTMLCanvasElement}
  */
 
-export function graph_f1(width, height, f) {
+export function graph_f1(options, width, height, f) {
     // 1d and 2d functions are rendered on a canvas.
     var canvas;
-    //if (options && options.canvas) =  || document.createElement('canvas');
-    canvas = document.createElement('canvas');
+    if (options && options.canvas) {
+        canvas = options.canvas;
+    } else {
+        canvas = document.createElement('canvas');
+    }
     canvas.width = width;
     canvas.height = height;
     var w = canvas.width;

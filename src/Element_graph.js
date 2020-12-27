@@ -7,6 +7,7 @@
 //   graph(function=>array) => same as above, for animation scenario's this function is called each frame.
 // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
 
+import Canvas2D from "./Canvas2D.js";
 import { graph_f1 } from "./Element_graph_f1.js";
 import { graph_f2 } from "./Element_graph_f2.js";
 import { graph_f2_table } from "./Element_graph_f2_table.js";
@@ -322,13 +323,21 @@ export default function Element_graph(
     }
     if (f.length == 2) {
         if (options.format == "table") {
-            return graph_f2_table(ww, hh, f);
+            var table = graph_f2_table(ww, hh, f);
+            return table;
         } else {
-
-            return graph_f2(ww, hh, f);
+            var canvas = graph_f2(options, ww, hh, f);
+            var canvas2d = new Canvas2D(canvas);
+            canvas2d.drawGrid();
+            canvas.canvas2d = canvas2d;
+            return canvas;
         }
     } else if (f.length == 1) {
-        return graph_f1(ww, hh, f);
+        var canvas = graph_f1(options, ww, hh, f);
+        var canvas2d = new Canvas2D(canvas);
+        canvas2d.drawGrid();
+        canvas.canvas2d = canvas2d;
+        return canvas;
     }
     return cvs;
 }
