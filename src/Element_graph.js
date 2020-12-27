@@ -80,8 +80,9 @@ export default function Element_graph(
         // The build function generates the actual SVG. It will be called everytime the user interacts or the anim flag is set.
         function build(f, or) {
             // Make sure we have an aray.
-            if (or && f && f instanceof Function)
+            if (or && f && f instanceof Function) {
                 f = f();
+            }
             // Reset position and color for cursor.
             lx = -2;
             ly = -1.85;
@@ -97,28 +98,69 @@ export default function Element_graph(
         // Handle conformal 2D elements.
         ${options.conformal ? f.map && f.map((o, oidx) => {
                     // Optional animation handling.
-                    if ((o == Element.graph && or !== false) || (oidx == 0 && options.animate && or !== false)) { anim = true; requestAnimationFrame(() => { var r = build(origf, (!res) || (document.body.contains(res))).innerHTML; if (res) res.innerHTML = r; }); if (!options.animate) return; }
+                    if ((o == Element.graph && or !== false) || (oidx == 0 && options.animate && or !== false)) {
+                        anim = true;
+                        requestAnimationFrame(
+                            () => {
+                                var r = build(origf, (!res) || (document.body.contains(res))).innerHTML;
+                                if (res) {
+                                    res.innerHTML = r;
+                                }
+                            }
+                        );
+                        if (!options.animate) {
+                            return;
+                        }
+                    }
                     // Resolve expressions passed in.
-                    while (o.call) o = o();
-                    if (options.ipns && o instanceof Element) o = o.Dual;
+                    while (o.call) {
+                        o = o();
+                    }
+                    if (options.ipns && o instanceof Element) {
+                        o = o.Dual;
+                    }
                     var sc = options.scale;
                     var lineWidth = options.lineWidth || 1;
                     var pointRadius = options.pointRadius || 1;
                     var dash_for_r2 = (r2, render_r, target_width) => {
                         // imaginary circles are dotted
-                        if (r2 >= 0) return 'none';
+                        if (r2 >= 0)
+                            return 'none';
                         var half_circum = render_r * Math.PI;
                         var width = half_circum / Math.max(Math.round(half_circum / target_width), 1);
                         return `${width} ${width}`;
                     };
                     // Arrays are rendered as segments or polygons. (2 or more elements)
-                    if (o instanceof Array) { lx = ly = lr = 0; o = o.map(o => { while (o.call) o = o(); return o.Scale(-1 / o.Dot(ni).s); }); o.forEach((o) => { lx += sc * (o.e1); ly += sc * (-o.e2) }); lx /= o.length; ly /= o.length; return o.length > 2 ? `<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o => (sc * o.e1 + ',' + (-o.e2 * sc) + ' '))}"/>` : `<LINE style="pointer-events:none" x1=${o[0].e1 * sc} y1=${-o[0].e2 * sc} x2=${o[1].e1 * sc} y2=${-o[1].e2 * sc} stroke="${color || '#888'}"/>`; }
+                    if (o instanceof Array) {
+                        lx = ly = lr = 0;
+                        o = o.map(o => {
+                            while (o.call)
+                                o = o();
+                            return o.Scale(-1 / o.Dot(ni).s);
+                        });
+                        o.forEach((o) => {
+                            lx += sc * (o.e1);
+                            ly += sc * (-o.e2)
+                        });
+                        lx /= o.length;
+                        ly /= o.length;
+                        return o.length > 2 ? `<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o => (sc * o.e1 + ',' + (-o.e2 * sc) + ' '))}"/>` : `<LINE style="pointer-events:none" x1=${o[0].e1 * sc} y1=${-o[0].e2 * sc} x2=${o[1].e1 * sc} y2=${-o[1].e2 * sc} stroke="${color || '#888'}"/>`;
+                    }
                     // Allow insertion of literal svg strings.
-                    if (typeof o == 'string' && o[0] == '<') { return o; }
+                    if (typeof o == 'string' && o[0] == '<') {
+                        return o;
+                    }
                     // Strings are rendered at the current cursor position.
-                    if (typeof o == 'string') { var res2 = (o[0] == '_') ? '' : `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize * 0.1 || 0.1}" style="pointer-events:none" fill="${color || '#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly += 0.14; return res2; }
+                    if (typeof o == 'string') {
+                        var res2 = (o[0] == '_') ? '' : `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize * 0.1 || 0.1}" style="pointer-events:none" fill="${color || '#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`;
+                        ly += 0.14;
+                        return res2;
+                    }
                     // Numbers change the current color.
-                    if (typeof o == 'number') { color = '#' + (o + (1 << 25)).toString(16).slice(-6); return ''; };
+                    if (typeof o == 'number') {
+                        color = '#' + (o + (1 << 25)).toString(16).slice(-6);
+                        return '';
+                    }
                     // All other elements are rendered ..
                     var ni_part = o.Dot(no.Scale(-1));  // O_i + n_o O_oi
                     var no_part = ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
@@ -280,7 +322,6 @@ export default function Element_graph(
     }
     if (f.length == 2) {
         if (options.format == "table") {
-            ww = 16; hh = 16; // Limit for debugging
             return graph_f2_table(ww, hh, f);
         } else {
 
