@@ -307,38 +307,131 @@
   
   <SCRIPT>
   // Data : built-in examples.
-    var examples = ["complex_mandelbrot","complex_mandelbrot_table","complex_least_squares","complex_sincos","complex_mandelbrot_mousemove",
-                    "dual_differentiation","dual_backpropagation",
-                    "quaternion_hue","quaternion_mandelbrot",
-                    "timespace_lorentz",
-                    "ga3d_rotor_estimation",
-                    "pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","pga2d_differentiation","pga2d_physics_moon","pga2d_origami", "pga2d_poncelet", "pga2d_non_euclidean","pga2d_raytrace",
-                    "pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","pga3d_differentiation","pga3d_skinning","pga3d_physics_planets","pga3d_origami","pga3d_physics_symmetric_top","pga3d_physics_free_top","pga3d_objects","pga3d_levenberg_marquardt","pga3d_motor_orbits",
-                    "chapter11_motor_reconstruction","chapter11_motors","chapter11_tricycle",
-                    "cga2d_points_and_circles","cga2d_project_and_reject","cga2d_rotors_and_translators","cga2d_euler_line","cga2d_circle_fit","cga2d_conformal","cga2d_conformal2",
-                    "cga3d_points_circles_lines","cga3d_points_spheres_planes","cga3d_dual_spheres_planes","cga3d_intersections","cga3d_project_reject","cga3d_opns_visualizer","cga3d_opns_line_circle","cga3d_json",
-                    "mga3d_points_and_lines",
-                    "ccga3d_points_quadrics",
-                    "csga2d_opns",
-                    "qcga3d_points_and_more",
-                    "c2dga_curves",
-                    "game_wedge"];
+    var examples = [
+      // Cubic 2D GA
+      "c2dga_curves",
+
+      // 3D CCGA
+      "ccga3d_points_quadrics",
+
+      // 2D CGA
+      "cga2d_basics",
+      "cga2d_circle_fit",
+      "cga2d_conformal",
+      "cga2d_conformal2",
+      "cga2d_euler_line",
+      "cga2d_points_and_circles",
+      "cga2d_project_and_reject",
+      "cga2d_rotors_and_translators",
+
+      // Complex
+      "complex_mandelbrot",
+      "complex_mandelbrot_table",
+      "complex_least_squares",
+      "complex_sincos",
+      "complex_mandelbrot_mousemove",
+
+      // Dual
+      "dual_differentiation",
+      "dual_backpropagation",
+
+      // Quaternion
+      "quaternion_hue",
+      "quaternion_mandelbrot",
+
+      // Timespace
+      "timespace_lorentz",
+
+      // 3D GA
+      "ga3d_rotor_estimation",
+
+      // 2D PGA
+      "pga2d_points_and_lines",
+      "pga2d_distances_and_angles",
+      "pga2d_project_and_reject",
+      "pga2d_rotors_and_translators",
+      "pga2d_isometries",
+      "pga2d_inverse_kinematics",
+      "pga2d_separating_axis",
+      "pga2d_pose_estimation",
+      "pga2d_euler_line",
+      "pga2d_desargues_theorem",
+      "pga2d_differentiation",
+      "pga2d_physics_moon",
+      "pga2d_origami",
+      "pga2d_poncelet",
+      "pga2d_non_euclidean",
+      "pga2d_raytrace",
+
+      // 3D PGA
+      "pga3d_points_and_lines",
+      "pga3d_distances_and_angles",
+      "pga3d_rotors_and_translators",
+      "pga3d_icosahedron",
+      "pga3d_sampling",
+      "pga3d_slicing",
+      "pga3d_differentiation",
+      "pga3d_skinning",
+      "pga3d_physics_planets",
+      "pga3d_origami",
+      "pga3d_physics_symmetric_top",
+      "pga3d_physics_free_top",
+      "pga3d_objects",
+      "pga3d_levenberg_marquardt",
+      "pga3d_motor_orbits",
+
+      "chapter11_motor_reconstruction",
+      "chapter11_motors",
+      "chapter11_tricycle",
+
+
+      // 3D CGA
+      "cga3d_points_circles_lines",
+      "cga3d_points_spheres_planes",
+      "cga3d_dual_spheres_planes",
+      "cga3d_intersections",
+      "cga3d_project_reject",
+      "cga3d_opns_visualizer",
+      "cga3d_opns_line_circle",
+      "cga3d_json",
+
+      // 3D Mother Algebra
+      "mga3d_points_and_lines",
+
+
+      // 2D CSGA
+      "csga2d_opns",
+
+      // 3D QCGA
+      "qcga3d_points_and_more",
+
+
+      "game_wedge"
+    ];
   
   
   // Elements.
     var els={};
-    [".hider", "#inspectTable", "#inspectTable2", "#editJSON", "#copyJSON", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+    [
+      ".hider", "#inspectTable", "#inspectTable2", "#editJSON",
+      "#copyJSON", ".inspect",".help","#stash", "#tab1", "#tab2",
+      "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput",
+      "#urlInput", "#new","#fork","#save", "#properties", "#sample",
+      ".left",".center",".right","#lgutter","#rgutter"
+    ].forEach(
+      x => els[x.replace(/[.#]/g,'')]=document.querySelector(x)
+    );
   
   // Ace editor.
     if (window.ace) {
-    var editor = ace.edit('source');
+      var editor = ace.edit('source');
       editor.setTheme("ace/theme/chrome");
       editor.session.setMode("ace/mode/javascript");
       editor.session.setUseWorker(false);
       editor.setHighlightActiveLine(false);
       editor.$blockScrolling = Infinity;
       // Body scroll lock for iOs
-//      bodyScrollLock.disableBodyScroll();
+      // bodyScrollLock.disableBodyScroll();
     } else { // can't load editor.
       Object.assign(els.right.style,{width:0,maxWidth:0,minWidth:0});
     }
@@ -495,9 +588,11 @@
   // Generate example cards.
     var excards = examples.map(e=>{
       var card = Object.assign(document.createElement('div'),{className:'card'});
-      if (e) card.style.backgroundImage="url('../images/"+e+".jpg')";
+      if (e) {
+        card.style.backgroundImage="url('../images/"+e+".jpg')";
+      }
       card.innerHTML = '<p>'+e.split('_').slice(1).join(' ')+'</p>';
-      card.onclick = (x)=>{
+      card.onclick = (x) => {
         els.sample.src='example_'+e+'.html';
         document.location.hash = e;
         els.title.innerText = "The CoffeeShop";
@@ -535,7 +630,11 @@
     updateStash();  
     
   // Close the introbar
-    function closeBar() { document.querySelector('.hider').style.height='0px'; postRun(); editor&&editor.resize(); }  
+    function closeBar() {
+      document.querySelector('.hider').style.height='0px';
+      postRun();
+      editor && editor.resize();
+    }
     
   // Setup sample group handlers
     [...document.querySelectorAll(".sampleGroup")].forEach(s=>{
@@ -550,23 +649,57 @@
     });  
   
   // Sizeable panes.  
-    els.lgutter.onmousedown = (e)=>{
-      e.preventDefault(); e.stopPropagation(); els.center.style.pointerEvents = 'none'; els.left.style.overflow = 'hidden';
-      window.onmousemove = function(e) { els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth =  Math.max(0,e.x-2)+"px"; postRun(); };
-      window.onmouseleave = window.onmouseup = function(e) { els.left.style.overflow=''; els.center.style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
+    els.lgutter.onmousedown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      els.center.style.pointerEvents = 'none';
+      els.left.style.overflow = 'hidden';
+      window.onmousemove = function(e) {
+        els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth = Math.max(0,e.x-2) + "px";
+        postRun();
+      };
+      window.onmouseleave = window.onmouseup = function(e) {
+        els.left.style.overflow='';
+        els.center.style.pointerEvents = 'all';
+        window.onmouseleave = window.onmouseup = window.onmousemove = undefined;
+      };
     }
-    els.rgutter.onmousedown = (e)=>{
-      e.preventDefault(); e.stopPropagation(); els.center.style.pointerEvents = 'none';
-      window.onmousemove = function(e) { els.right.style.width = els.right.style.minWidth = (window.innerWidth-e.x-2)+"px"; postRun(); };
-      window.onmouseleave = window.onmouseup = function(e) { els.center.style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
+    els.rgutter.onmousedown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      els.center.style.pointerEvents = 'none';
+      window.onmousemove = function(e) {
+        els.right.style.width = els.right.style.minWidth = (window.innerWidth-e.x-2)+"px";
+        postRun();
+      };
+      window.onmouseleave = window.onmouseup = function(e) {
+        els.center.style.pointerEvents = 'all';
+        window.onmouseleave = window.onmouseup = window.onmousemove = undefined;
+      };
     }
-    els.lgutter.ondblclick = (e)=>{ els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth = els.left.style.width=="0px" ? "":"0px"; postRun(); }
-    els.rgutter.ondblclick = (e)=>{ els.right.style.width = els.right.style.minWidth = els.right.style.maxWidth = els.right.style.width=="0px" ? "":"0px"; postRun(); }
+    els.lgutter.ondblclick = (e) => {
+      els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth = els.left.style.width=="0px" ? "":"0px";
+      postRun();
+    }
+    els.rgutter.ondblclick = (e) => {
+      els.right.style.width = els.right.style.minWidth = els.right.style.maxWidth = els.right.style.width=="0px" ? "":"0px";
+      postRun();
+    }
   
   // Link run handler.
-    els.run.onclick=(e)=>{
-      var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
-      if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
+    els.run.onclick = (e) => {
+      var f = els.sample.contentDocument.body.firstChild;
+      while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement))
+        f = f.nextElementSibling;
+      f = f && f.nextElementSibling;
+      if (f)
+        while (true) {
+          var g=f.nextSibling;
+          els.sample.contentDocument.body.removeChild(f);
+          if (!g)
+            break;
+          f = g;
+        }
       try { 
         els.sample.contentWindow.eval( editor.getValue() ); 
         setTimeout(()=>postRun(),1); // for fox.
@@ -583,9 +716,14 @@
 
   // helper to resize loaded content  
     function postRun() {
-    // See if we have a canvas.  
-      var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
-      if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
+      // See if we have a canvas.
+      var doc = els.sample.contentDocument || document;
+      var disp = doc.querySelector("svg") || doc.querySelector("canvas");
+      if (disp && disp.value) {
+        disp.style.width=disp.style.height='100%';
+        if (disp.update && (!disp.options || !disp.options.animate))
+          disp.update(disp.value);
+      }
     }
     
   // on iframe load..
@@ -602,9 +740,18 @@
         editor.setValue(scripttext);
         editor.clearSelection();
       // Link shift+enter  
-        editor.commands.addCommand({ name: "run changes", bindKey: {win: "Shift-Enter", mac: "Shift-Enter"}, exec: function(editor) { els.run.click(); } });
+        editor.commands.addCommand({
+          name: "run changes",
+          bindKey: {win: "Shift-Enter", mac: "Shift-Enter"},
+          exec: function(editor) {
+            els.run.click();
+          }
+        });
       // Link editor changes.  
-        editor.session.on('change',e=>{ els.save.style.display="block"; els.save.classList.add("active"); });
+        editor.session.on('change', e => {
+          els.save.style.display="block";
+          els.save.classList.add("active");
+        });
         els.save.classList.remove('active');
       }
     }
