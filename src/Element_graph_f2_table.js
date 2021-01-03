@@ -76,15 +76,33 @@ export function graph_f2_table(w, h, f) {
         for (var py = 0; py < h; py++) {
             
             var res = f(px / w * 2 - 1, py / h * 2 - 1);
-            min = Math.min(res, min);
-            max = Math.max(res, max);
-            res = res.buffer ? [].slice.call(res) : res.slice ? res : [res, res, res];
-            originalData.set(
-                res.map(
-                    x => x * 255
-                ).concat([255]),
-                py * w * 4 + px * 4
-            );
+            //res = res.buffer ? [].slice.call(res) : res.slice ? res : [res, res, res];
+            if (res.buffer)
+                res = [].slice.call(res);
+            if (res instanceof Array) {
+                    
+                for (var i=0; i<res.length; i++) {
+                    min = Math.min(res[i], min);
+                    max = Math.max(res[i], max);
+                }
+                originalData.set(
+                    res.map(
+                        x => x * 255
+                    ).concat([255]),
+                    py * w * 4 + px * 4
+                );
+            
+            } else {
+                min = Math.min(res, min);
+                max = Math.max(res, max);
+                res = [res, res, res];
+                originalData.set(
+                    res.map(
+                        x => x * 255
+                    ).concat([255]),
+                    py * w * 4 + px * 4
+                );
+            }
         }
     }
     window.min = min;
