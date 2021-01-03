@@ -328,14 +328,18 @@ export default function Element_graph(
         } else {
             var canvas = graph_f2(options, ww, hh, f);
             var canvas2d = new Canvas2D(canvas);
-            canvas2d.drawGrid();
+            if (options && options.grid) {
+                canvas2d.drawGrid();
+            }
             canvas.canvas2d = canvas2d;
             return canvas;
         }
     } else if (f.length == 1) {
         var canvas = graph_f1(options, ww, hh, f);
         var canvas2d = new Canvas2D(canvas);
-        canvas2d.drawGrid();
+        if (options && options.grid) {
+            canvas2d.drawGrid();
+        }
         canvas.canvas2d = canvas2d;
         return canvas;
     }
