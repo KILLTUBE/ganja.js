@@ -1,0 +1,44 @@
+<script type="module">
+import Algebra from "../ganja.js"; // enki's version + export default Algebra
+//import Algebra from "../src/index.js"; // kungfooman's version
+Algebra(3,0,1,()=>{
+  const point = (x,y)=>!(1e0 + x*1e1 + y*1e2);
+
+  var A1 = point(-1,-0.4), A2 = point(-1.2,-0.3), A3 = point(-1.1,0);
+  var [B1,B2,B3] = [point(1,0.5),!-1e3,!1e2];
+    
+  var align = (p,q)=>{
+    for (var i=0, M=1, P=!1, Q=!1; i<p.length; ++i) {
+      P = Q & (M >>> p[i]);
+      Q = Q & q[i];
+      M = (1 + Q.Normalized / P.Normalized).Normalized * M;
+    }
+    return M
+  }
+
+  var lerp = (m,t)=>((1 - t) + t * m).Normalized;
+
+  var path = (m, steps, x)=>[...Array(steps)].map((e,i)=>lerp(m,i/(steps-1)) >>> x);
+
+  var svg = this.graph(()=>{
+    var t = 0.5 + 0.5 * Math.sin(performance.now()/1000);
+    return [
+      0xFF0000, ...path(align([A1,A2,A3],[B1,B2,B3]),10,[[A1,A2],[A2,A3],[A3,A1]]).flat(),
+      0x224488, A1, "A1", A2, "A2", A3, "A3", B1, "B1",
+    ]
+  },{
+    grid:1,
+    scale:1.5,
+    fontSize:2,
+    pointRadius:2,
+    lineWidth:5,
+  });
+
+  svg.style.width = '600px';
+  svg.style.height = '400px';
+  svg.style.background = 'white';
+
+  document.body.appendChild(svg);
+
+});
+</script>
