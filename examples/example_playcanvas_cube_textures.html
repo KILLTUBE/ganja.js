@@ -1,0 +1,146 @@
+<script type="module">
+import Algebra from "../src/index.js";
+import * as pc from "../../playcanvas-engine/build/playcanvas.mjs";
+
+window.pc = pc;
+
+// Create a complex Algebra.
+Algebra(0,1, () => {
+  var app;
+  var texture;
+  var addPlayCanvas = () => {
+    var canvas_pc = document.createElement("canvas");
+    document.body.appendChild(canvas_pc);
+
+    app = new pc.Application(canvas_pc);
+    
+    // fill the available space at full resolution
+    app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+    app.setCanvasResolution(pc.RESOLUTION_AUTO);
+    
+    // ensure canvas is resized when window changes size
+    window.addEventListener('resize', () => app.resizeCanvas());
+    
+    // create box entity
+    const box = new pc.Entity('cube');
+    window.box = box;
+    
+    box.addComponent('model', {
+        type: 'box'
+    });
+    texture = new pc.Texture(app.graphicsDevice, {
+        format: pc.PIXELFORMAT_R5_G6_B5,
+        autoMipmap: false
+    });
+    texture.minFilter = pc.FILTER_LINEAR;
+    texture.magFilter = pc.FILTER_LINEAR;
+    texture.addressU = pc.ADDRESS_CLAMP_TO_EDGE;
+    texture.addressV = pc.ADDRESS_CLAMP_TO_EDGE;
+    var material = new pc.BasicMaterial();
+    material.colorMap = texture;
+    material.update();
+    box.model.material = material;
+    app.root.addChild(box);
+    
+    // create camera entity
+    const camera = new pc.Entity('camera');
+    camera.addComponent('camera', {
+            clearColor: new pc.Color(0.1, 0.1, 0.1)
+    });
+    app.root.addChild(camera);
+    camera.setPosition(0, 0, 3);
+    
+    // create directional light entity
+    const light = new pc.Entity('light');
+    light.addComponent('light');
+    app.root.addChild(light);
+    light.setEulerAngles(45, 0, 0);
+    
+    // rotate the box according to the delta time since the last frame
+    app.on('update', dt => box.rotate(10 * dt, 20 * dt, 30 * dt));
+    
+    app.start();
+    
+  }
+  addPlayCanvas();
+  
+  var func = (x,y) => Math.sin(x*y*50) * Math.cos(y+x);
+  var canvas = this.graph(func, {
+      grid: true,
+      width: 512,
+      height: 512
+  });
+
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ff3333" // reddish
+  ctx.fillStyle = "rgb(120,110,80)" // light browish
+  ctx.fillStyle = "rgb(250,160,10)" // yellowish
+  ctx.fillRect(0, 0, 512, 512);
+  
+  // black grid (strong)
+  ctx.fillStyle = "black";
+  var barWidth = 10;
+  // left to right
+  //ctx.fillRect(0, 256-(barWidth/2), 512, barWidth) // left, top, width, height
+  // top to bottom
+  //ctx.fillRect(256-(barWidth/2), 0, barWidth, 512) // left, top, width, height
+  
+  // small horizonzal bars
+  barWidth = 2;
+  ctx.fillRect(0, 256*0/4-(barWidth/2), 512, barWidth * 3) // left, top, width, height
+  ctx.fillRect(0, 256*1/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*2/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*3/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*4/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*5/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*6/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 256*7/4-(barWidth/2), 512, barWidth) // left, top, width, height
+  ctx.fillRect(0, 512-(barWidth*3), 512, barWidth * 3) // left, top, width, height
+  
+  // small vertical bars
+  barWidth = 2;
+  ctx.fillRect(256*0/4-(barWidth/2), 0, barWidth * 3, 512) // left, top, width, height
+  ctx.fillRect(256*1/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*2/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*3/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*4/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*5/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*6/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(256*7/4-(barWidth/2), 0, barWidth    , 512) // left, top, width, height
+  ctx.fillRect(    512-(barWidth*3), 0, barWidth * 3, 512) // left, top, width, height
+  
+  ctx.font = "16px Arial";
+  ctx.fillText("512x512", 10, 20); // left, top
+  
+  function print1234(left, top) {
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 20;
+    ctx.lineWidth = 5;
+    ctx.font = "128px Verdana";
+    ctx.fillStyle = "black"
+    ctx.fillText("1", left+ 25+5, top+100+10);
+    ctx.fillText("2", left+140+5, top+100+10);
+    ctx.fillText("3", left+ 25+5, top+220+10);
+    ctx.fillText("4", left+140+5, top+220+10);
+    
+    ctx.font = "123px Verdana";
+    ctx.fillStyle = "white";
+    ctx.fillText("1", left+ 25+5, top+100+10);
+    ctx.fillText("2", left+140+5, top+100+10);
+    ctx.fillText("3", left+ 25+5, top+220+10);
+    ctx.fillText("4", left+140+5, top+220+10);
+  }
+  ctx.fillStyle = "black"
+  print1234(  0,   0); // left, top
+  print1234(256,   0); // left, top
+  print1234(  0, 256); // left, top
+  print1234(256, 256); // left, top
+  if (app) {
+    texture.setSource(canvas);
+    
+  }
+  
+  document.body.appendChild(canvas);
+});
+
+</SCRIPT>
